@@ -11,7 +11,6 @@ public class MidiDeviceConnector {
 
     private Transmitter transmitter = null;
     private Receiver receiver = null;
-    private MidiDevice md;
 
     public MidiDeviceConnector(String devNamePart) {
 
@@ -52,8 +51,7 @@ public class MidiDeviceConnector {
             System.out.println("ERROR: No Device which contains " + devNamePart + " in its name found!");
             return;
         }
-
-        md = getMidiDevice();
+        MidiDevice md = getMidiDevice();
         Receiver mdR = null;
         Transmitter mdT = null;
         try {
@@ -71,7 +69,7 @@ public class MidiDeviceConnector {
         System.out.println("Finished!");
     }
 
-    public static Receiver getMidiReceiver(MidiDevice ownerOfReceiver) {
+    private static Receiver getMidiReceiver(MidiDevice ownerOfReceiver) {
         return new MidiDeviceReceiver() {
             private boolean open = true;
 
@@ -94,7 +92,7 @@ public class MidiDeviceConnector {
         };
     }
 
-    public static MidiDeviceTransmitter getTransMidiTransmitter(MidiDevice ownerOfTransmitter) {
+    private static MidiDeviceTransmitter getTransMidiTransmitter(MidiDevice ownerOfTransmitter) {
         return new MidiDeviceTransmitter() {
             private Receiver receiver;
 
@@ -120,7 +118,7 @@ public class MidiDeviceConnector {
         };
     }
 
-    public static MidiDevice getMidiDevice() {
+    private static MidiDevice getMidiDevice() {
         return new MidiDevice() {
             boolean isOpen = false;
             long openTime = System.currentTimeMillis();
@@ -189,15 +187,7 @@ public class MidiDeviceConnector {
         };
     }
 
-    public Transmitter getTransmitter() {
-        return transmitter;
-    }
-
     public Receiver getReceiver() {
         return receiver;
-    }
-
-    public MidiDevice getMd() {
-        return md;
     }
 }

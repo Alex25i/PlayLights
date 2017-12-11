@@ -15,7 +15,7 @@ public class MidiController {
 
     private MidiController() {
         midiDeviceConnector = new MidiDeviceConnector("Mixtrack");
-        mixTrackController = new MixTrackController(midiDeviceConnector.getReceiver());
+        mixTrackController = new MixTrackController();
 
     }
 

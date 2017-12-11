@@ -1,7 +1,6 @@
 package Midi;
 
 import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import java.util.ArrayList;
 import java.util.List;
@@ -196,7 +195,7 @@ public class MixTrackController {
     public static final byte PITHC_BEND_MID_B_LED_ADDRESS = 0x52;
 
 
-    MixTrackController(Receiver receiver) {
+    MixTrackController() {
     }
 
     public void sendTestLedCommands() {
@@ -207,7 +206,7 @@ public class MixTrackController {
 
         byte[] midiMessage = new byte[3];
         midiMessage[0] = messageTypeNode;
-        midiMessage[1] = SCRATCH_A_LED_ADDRESS;
+        midiMessage[1] = CUE_MODE_A_LED;
         midiMessage[2] = velocityFull;
 
         ShortMessage testMessage = new ShortMessage();
@@ -217,6 +216,7 @@ public class MixTrackController {
         } catch (InvalidMidiDataException e) {
             e.printStackTrace();
         }
+
     }
 
 
