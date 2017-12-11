@@ -11,6 +11,7 @@ public class MidiDeviceConnector {
 
     private Transmitter transmitter = null;
     private Receiver receiver = null;
+    private MidiDevice md;
 
     public MidiDeviceConnector(String devNamePart) {
 
@@ -18,6 +19,7 @@ public class MidiDeviceConnector {
         // Obtain information about all the installed devices.
         MidiDevice device = null;
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+        boolean found = false;
         for (MidiDevice.Info info : infos) {
             try {
                 device = MidiSystem.getMidiDevice(info);
@@ -25,7 +27,8 @@ public class MidiDeviceConnector {
             } catch (MidiUnavailableException e) {
                 // Handle or throw exception...
             }
-            if (device.getDeviceInfo().getName().contains(devNamePart)) {
+            if (device.getDeviceInfo().getName().toLowerCase().contains(devNamePart.toLowerCase())) {
+                found = true;
                 try {
                     device.open();
                 } catch (MidiUnavailableException e) {
@@ -45,7 +48,12 @@ public class MidiDeviceConnector {
             }
         }
 
-        MidiDevice md = getMidiDevice();
+        if (!found) {
+            System.out.println("ERROR: No Device which contains " + devNamePart + " in its name found!");
+            return;
+        }
+
+        md = getMidiDevice();
         Receiver mdR = null;
         Transmitter mdT = null;
         try {
@@ -59,7 +67,7 @@ public class MidiDeviceConnector {
             e.printStackTrace();
         }
         transmitter.setReceiver(mdR);
-
+        mdT.setReceiver(receiver);
         System.out.println("Finished!");
     }
 
@@ -75,7 +83,7 @@ public class MidiDeviceConnector {
             @Override
             public void send(MidiMessage message, long timeStamp) {
                 if (open) {
-                    MidiPro.messageReceived(message, timeStamp);
+                    MidiController.getInstance().precessMessage(message, timeStamp);
                 }
             }
 
@@ -187,5 +195,9 @@ public class MidiDeviceConnector {
 
     public Receiver getReceiver() {
         return receiver;
+    }
+
+    public MidiDevice getMd() {
+        return md;
     }
 }
