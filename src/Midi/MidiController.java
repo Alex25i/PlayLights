@@ -26,14 +26,10 @@ public class MidiController {
 
         System.out.println(Integer.toHexString(midiType) + " " + Integer.toHexString(midiNode) + " " + Integer.toHexString(midiVelocity));
 
-        if (midiType == MESSAGE_TYPE_NODE && midiNode == MixTrackController.SCRATCH_A_ADDRESS) {
-            sendTestMessage();
-        }
+        
     }
 
-    private void sendTestMessage() {
-        mixTrackController.sendTestLedCommands();
-    }
+
 
     public static MidiController getMidiController() {
         return midiController;
