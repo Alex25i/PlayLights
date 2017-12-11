@@ -190,34 +190,52 @@ public class MixTrackController {
     public static final byte FOLDER_LED_ADDRESS = 0x34;
 
 
-    // pitch bend button (top outer corner)
-    public static final byte PITHC_BEND_MID_A_LED_ADDRESS = 0x48;
-    public static final byte PITHC_BEND_MID_B_LED_ADDRESS = 0x52;
+    // pitch bend LEDs (top outer corner)
+    public static final byte PITCH_BEND_MID_A_LED_ADDRESS = 0x28;
+    public static final byte PITCH_BEND_MID_B_LED_ADDRESS = 0x29;
 
 
     MixTrackController() {
     }
 
-    public void sendTestLedCommands() {
-        final byte messageTypeNode = (byte) 0x90;
-        final byte messageTypeComand = (byte) 0xb0;
-        final byte velocityNone = (byte) 0x00;
-        final byte velocityFull = (byte) 0x7f;
 
+    /**
+     * turns one specific led on or off
+     *
+     * @param ledID the LED which to be turned on or off
+     * @param on    defines weather the LED should be on or off
+     */
+    public void setLedIllumination(byte ledID, boolean on) {
         byte[] midiMessage = new byte[3];
-        midiMessage[0] = messageTypeNode;
-        midiMessage[1] = CUE_MODE_A_LED;
-        midiMessage[2] = velocityFull;
+        midiMessage[0] = MidiController.MESSAGE_TYPE_NODE;
+        midiMessage[1] = ledID;
+        if (on) {
+            midiMessage[2] = MidiController.VELOCITY_FULL;
+        } else {
+            midiMessage[2] = MidiController.VELOCITY_NONE;
+        }
 
         ShortMessage testMessage = new ShortMessage();
         try {
             testMessage.setMessage(midiMessage[0], midiMessage[1], midiMessage[2]);
-            MidiController.getInstance().getMidiDeviceConnector().getReceiver().send(testMessage, -1);
+            MidiController.getMidiController().getMidiDeviceConnector().getReceiver().send(testMessage, -1);
         } catch (InvalidMidiDataException e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * turns of all default illuminated LEDs of the controller
+     */
+    public void blackoutLEDs() {
+        setLedIllumination(SYNC_A_LED_ADDRESS, false);
+        setLedIllumination(CUE_A_LED_ADDRESS, false);
+        setLedIllumination(PLAY_A_LED_ADDRESS, false);
+        setLedIllumination(STUTTER_A_LED_ADDRESS, false);
 
+        setLedIllumination(SYNC_B_LED_ADDRESS, false);
+        setLedIllumination(CUE_B_LED_ADDRESS, false);
+        setLedIllumination(PLAY_B_LED_ADDRESS, false);
+        setLedIllumination(STUTTER_B_LED_ADDRESS, false);
+    }
 }

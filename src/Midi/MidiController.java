@@ -4,26 +4,18 @@ import javax.sound.midi.MidiMessage;
 
 public class MidiController {
 
-    private final int MESSAGE_TYPE_NODE = 0x90;
-    private final int MESSAGE_TYPE_COMAND = 0xb0;
-    private final int VELOCITY_NONE = 0x00;
-    private final int VELOCITY_FULL = 0x7f;
+    public static final byte MESSAGE_TYPE_NODE = (byte) 0x90;
+    public static final byte MESSAGE_TYPE_COMAND = (byte) 0xb0;
+    public static final byte VELOCITY_NONE = 0x00;
+    public static final byte VELOCITY_FULL = 0x7f;
 
-    private static MidiController instance;
+    private static MidiController midiController;
     private MidiDeviceConnector midiDeviceConnector;
     private MixTrackController mixTrackController;
 
     private MidiController() {
         midiDeviceConnector = new MidiDeviceConnector("Mixtrack");
         mixTrackController = new MixTrackController();
-
-    }
-
-    public static MidiController getInstance() {
-        if (instance == null) {
-            instance = new MidiController();
-        }
-        return instance;
     }
 
     public void precessMessage(MidiMessage message, long timeStamp) {
@@ -43,6 +35,10 @@ public class MidiController {
         mixTrackController.sendTestLedCommands();
     }
 
+    public static MidiController getMidiController() {
+        return midiController;
+    }
+
     public MidiDeviceConnector getMidiDeviceConnector() {
         return midiDeviceConnector;
     }
@@ -52,6 +48,7 @@ public class MidiController {
     }
 
     public static void main(String[] args) {
-        getInstance();
+        MidiController.midiController = new MidiController();
+        MidiController.getMidiController().getMixTrackController().blackoutLEDs();
     }
 }
