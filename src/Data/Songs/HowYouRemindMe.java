@@ -1,4 +1,6 @@
 package Data.Songs;
 
-public class HowYouRemindMe {
+import Data.Song;
+
+public class HowYouRemindMe extends Song {
 }
