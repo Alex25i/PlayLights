@@ -48,7 +48,7 @@ public class MidiDeviceConnector {
         }
 
         if (!found) {
-            System.out.println("ERROR: No Device which contains " + devNamePart + " in its name found!");
+            new IllegalStateException("ERROR: No Device which contains " + devNamePart + " in its name found!").printStackTrace();
             return;
         }
         MidiDevice md = getMidiDevice();

@@ -6,16 +6,20 @@ import java.util.ArrayList;
 
 public class Song {
 
-    protected String name;
-    protected String interpret;
-    protected int tempo;
-    protected ArrayList<UserEvent> userEvent;
+    public String name;
+    public String interpret;
+    public int tempo;
+    public ArrayList<UserEvent> userEvents;
 
-    public Song(String name, String interpret, int tempo, ArrayList<UserEvent> userEvents) {
+    public Song(String name, String interpret, int tempo) {
         this.name = name;
         this.interpret = interpret;
         this.tempo = tempo;
-        this.userEvent = userEvents;
+        this.userEvents = new ArrayList<>();
+    }
+
+    public void addUserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad, Runnable eventAction) {
+        userEvents.add(new UserEvent(name, eventTime, triggerPad, eventAction));
     }
 
     public String getName() {
@@ -42,20 +46,18 @@ public class Song {
         this.tempo = tempo;
     }
 
-    protected abstract static class UserEvent {
+    private static class UserEvent {
         private String name;
         private BeatStamp eventTime;
         private MixTrackController.PAD triggerPad;
         private Runnable eventAction;
 
-        protected UserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad) {
+        private UserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad, Runnable eventAction) {
             this.name = name;
             this.eventTime = eventTime;
             this.triggerPad = triggerPad;
-            this.eventAction = defineEventAction();
+            this.eventAction = eventAction;
         }
-
-        protected abstract Runnable defineEventAction();
 
         protected BeatStamp getEventTime() {
             return eventTime;

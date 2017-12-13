@@ -1,5 +1,7 @@
 package Logic;
 
+import Data.BeatStamp;
+
 public class LiveTimeCode {
 
     private Long reverenceTime;
@@ -13,6 +15,7 @@ public class LiveTimeCode {
             throw new IllegalStateException("The tempo is not set or incorrect ");
         }
         reverenceTime = System.currentTimeMillis();
+        //TODO: Timed-run the Song.userEvents
     }
 
     public void stop() {
@@ -36,7 +39,7 @@ public class LiveTimeCode {
         }
         if (!isStarted()) {
             new IllegalStateException("Can't trigger a code on a not running beat code").printStackTrace();
-            System.err.println("Requested run time:\nBar " + runAtBeat.barNr + " Beat: " + runAtBeat.beatNr);
+            System.err.println("Requested run time:\nBar " + runAtBeat.getBarNr() + " Beat: " + runAtBeat.getBeatNr());
         }
 
         Runnable waitRunnable = () -> {
@@ -56,7 +59,7 @@ public class LiveTimeCode {
 
     private long calculateTimeToReach(BeatStamp beatStamp) {
         // beats between the beat/time Sync and given beat stamp
-        int deltaBeats = (beatStamp.barNr * beatsPerBar + beatStamp.beatNr) - (reverencePosition.barNr * beatsPerBar + reverencePosition.beatNr);
+        int deltaBeats = (beatStamp.getBarNr() * beatsPerBar + beatStamp.getBeatNr()) - (reverencePosition.getBarNr() * beatsPerBar + reverencePosition.getBeatNr());
         if (deltaBeats < 0) {
             // deltaBeats is negative
             return -1;
@@ -91,13 +94,4 @@ public class LiveTimeCode {
         this.tempo = tempo;
     }
 
-    public class BeatStamp {
-        private int barNr;
-        private int beatNr;
-
-        public BeatStamp(int barNr, int beatNr) {
-            this.barNr = barNr;
-            this.beatNr = beatNr;
-        }
-    }
 }

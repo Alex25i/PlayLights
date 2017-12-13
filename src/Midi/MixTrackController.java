@@ -3,9 +3,14 @@ package Midi;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.ShortMessage;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MixTrackController {
+
+    public enum PAD {PAD_0X0, PAD_1X0, PAD_2X0, PAD_3X0, PAD_4X0, PAD_5X0, PAD_6X0, PAD_7X0, PAD_0X1, PAD_1X1, PAD_2X1, PAD_3X1, PAD_4X1, PAD_5X1, PAD_6X1, PAD_7X1,}
+
+    public enum BLINK_DURATION {BARS4, BARS2, BARS1}
 
     // ------ midi note (Message type 0x90) ------
 
@@ -194,8 +199,21 @@ public class MixTrackController {
     public static final byte PITCH_BEND_MID_A_LED_ADDRESS = 0x28;
     public static final byte PITCH_BEND_MID_B_LED_ADDRESS = 0x29;
 
+    private HashMap<PAD, Thread> padBlinkThreads;
 
     MixTrackController() {
+        padBlinkThreads = new HashMap<>(16);
+
+    }
+
+    public void blinkPad(PAD pad, BLINK_DURATION blinkDuration, int songTempo) {
+        // TODO: Implement method
+        if (padBlinkThreads.containsKey(pad)) {
+            padBlinkThreads.get(pad).interrupt();
+            setIllumination(pad, true);
+        }
+        padBlinkThreads.put(pad, createBlinkRunnable(pad, blinkDuration, songTempo));
+
     }
 
 
@@ -224,10 +242,79 @@ public class MixTrackController {
         }
     }
 
+    public void setIllumination(PAD pad, boolean on) {
+        switch (pad) {
+            case PAD_0X0:
+                setLedIllumination(PAD_0X0_LED_ADDRESS, on);
+                break;
+            case PAD_1X0:
+                setLedIllumination(PAD_1X0_LED_ADDRESS, on);
+                break;
+            case PAD_2X0:
+                setLedIllumination(PAD_2X0_LED_ADDRESS, on);
+                break;
+            case PAD_3X0:
+                setLedIllumination(PAD_3X0_LED_ADDRESS, on);
+                break;
+            case PAD_4X0:
+                setLedIllumination(PAD_4X0_LED_ADDRESS, on);
+                break;
+            case PAD_5X0:
+                setLedIllumination(PAD_5X0_LED_ADDRESS, on);
+                break;
+            case PAD_6X0:
+                setLedIllumination(PAD_6X0_LED_ADDRESS, on);
+                break;
+            case PAD_7X0:
+                setLedIllumination(PAD_7X0_LED_ADDRESS, on);
+                break;
+            case PAD_0X1:
+                for (Byte pad0x1Address : PAD_0X1_ADDRESS) {
+                    setLedIllumination(pad0x1Address, on);
+                }
+                break;
+            case PAD_1X1:
+                for (Byte padAddress : PAD_1X1_ADDRESS) {
+                    setLedIllumination(padAddress, on);
+                }
+                break;
+            case PAD_2X1:
+                for (Byte padAddress : PAD_2X1_ADDRESS) {
+                    setLedIllumination(padAddress, on);
+                }
+                break;
+            case PAD_3X1:
+                for (Byte padAddress : PAD_3X1_ADDRESS) {
+                    setLedIllumination(padAddress, on);
+                }
+                break;
+            case PAD_4X1:
+                for (Byte padAddress : PAD_4X1_ADDRESS) {
+                    setLedIllumination(padAddress, on);
+                }
+                break;
+            case PAD_5X1:
+                for (Byte padAddress : PAD_5X1_ADDRESS) {
+                    setLedIllumination(padAddress, on);
+                }
+                break;
+            case PAD_6X1:
+                for (Byte padAddress : PAD_6X1_ADDRESS) {
+                    setLedIllumination(padAddress, on);
+                }
+                break;
+            case PAD_7X1:
+                for (Byte padAddress : PAD_7X1_ADDRESS) {
+                    setLedIllumination(padAddress, on);
+                }
+                break;
+        }
+    }
+
     /**
      * turns of all default illuminated LEDs of the controller
      */
-    public void blackoutLEDs() {
+    public void blackoutStartLEDs() {
         setLedIllumination(SYNC_A_LED_ADDRESS, false);
         setLedIllumination(CUE_A_LED_ADDRESS, false);
         setLedIllumination(PLAY_A_LED_ADDRESS, false);
@@ -237,5 +324,12 @@ public class MixTrackController {
         setLedIllumination(CUE_B_LED_ADDRESS, false);
         setLedIllumination(PLAY_B_LED_ADDRESS, false);
         setLedIllumination(STUTTER_B_LED_ADDRESS, false);
+    }
+
+    private Thread createBlinkRunnable(PAD pad, BLINK_DURATION blink_duration, int tempo) {
+        return new Thread(() -> {
+            // TODO: implement Method
+            // TODO: HOW about interrupting the thread
+        });
     }
 }

@@ -45,6 +45,6 @@ public class MidiController {
 
     public static void main(String[] args) {
         MidiController.midiController = new MidiController();
-        MidiController.getMidiController().getMixTrackController().blackoutLEDs();
+        MidiController.getMidiController().getMixTrackController().blackoutStartLEDs();
     }
 }
