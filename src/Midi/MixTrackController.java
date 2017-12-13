@@ -213,7 +213,7 @@ public class MixTrackController {
             setIllumination(pad, true);
         }
         padBlinkThreads.put(pad, createBlinkRunnable(pad, blinkDuration, songTempo));
-
+        padBlinkThreads.get(pad).start();
     }
 
 
