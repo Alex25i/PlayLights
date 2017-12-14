@@ -3,7 +3,6 @@ package Midi;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.ShortMessage;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class MixTrackController {
@@ -199,21 +198,12 @@ public class MixTrackController {
     public static final byte PITCH_BEND_MID_A_LED_ADDRESS = 0x28;
     public static final byte PITCH_BEND_MID_B_LED_ADDRESS = 0x29;
 
-    private HashMap<PAD, Thread> padBlinkThreads;
-
     MixTrackController() {
-        padBlinkThreads = new HashMap<>(16);
-
     }
 
     public void blinkPad(PAD pad, BLINK_DURATION blinkDuration, int songTempo) {
         // TODO: Implement method
-        if (padBlinkThreads.containsKey(pad)) {
-            padBlinkThreads.get(pad).interrupt();
-            setIllumination(pad, true);
-        }
-        padBlinkThreads.put(pad, createBlinkRunnable(pad, blinkDuration, songTempo));
-        padBlinkThreads.get(pad).start();
+
     }
 
 
@@ -225,90 +215,72 @@ public class MixTrackController {
      */
     public void setLedIllumination(byte ledID, boolean on) {
         byte[] midiMessage = new byte[3];
-        midiMessage[0] = MidiController.MESSAGE_TYPE_NODE;
+        midiMessage[0] = MidiOrganizer.MESSAGE_TYPE_NODE;
         midiMessage[1] = ledID;
         if (on) {
-            midiMessage[2] = MidiController.VELOCITY_FULL;
+            midiMessage[2] = MidiOrganizer.VELOCITY_FULL;
         } else {
-            midiMessage[2] = MidiController.VELOCITY_NONE;
+            midiMessage[2] = MidiOrganizer.VELOCITY_NONE;
         }
 
         ShortMessage testMessage = new ShortMessage();
         try {
             testMessage.setMessage(midiMessage[0], midiMessage[1], midiMessage[2]);
-            MidiController.getMidiController().getMidiDeviceConnector().getReceiver().send(testMessage, -1);
+            MidiOrganizer.getMidiOrganizer().getMidiDeviceConnector().getReceiver().send(testMessage, -1);
         } catch (InvalidMidiDataException e) {
             e.printStackTrace();
         }
     }
 
     public void setIllumination(PAD pad, boolean on) {
+
+    }
+
+    private List<Byte> getPadLedAddresses(PAD pad) {
+        ArrayList<Byte> padAddresses = new ArrayList<>();
         switch (pad) {
             case PAD_0X0:
-                setLedIllumination(PAD_0X0_LED_ADDRESS, on);
-                break;
+                padAddresses.add(PAD_0X0_LED_ADDRESS);
+                return padAddresses;
             case PAD_1X0:
-                setLedIllumination(PAD_1X0_LED_ADDRESS, on);
-                break;
+                padAddresses.add(PAD_1X0_LED_ADDRESS);
+                return padAddresses;
             case PAD_2X0:
-                setLedIllumination(PAD_2X0_LED_ADDRESS, on);
-                break;
+                padAddresses.add(PAD_2X0_LED_ADDRESS);
+                return padAddresses;
             case PAD_3X0:
-                setLedIllumination(PAD_3X0_LED_ADDRESS, on);
-                break;
+                padAddresses.add(PAD_3X0_LED_ADDRESS);
+                return padAddresses;
             case PAD_4X0:
-                setLedIllumination(PAD_4X0_LED_ADDRESS, on);
-                break;
+                padAddresses.add(PAD_4X0_LED_ADDRESS);
+                return padAddresses;
             case PAD_5X0:
-                setLedIllumination(PAD_5X0_LED_ADDRESS, on);
-                break;
+                padAddresses.add(PAD_5X0_LED_ADDRESS);
+                return padAddresses;
             case PAD_6X0:
-                setLedIllumination(PAD_6X0_LED_ADDRESS, on);
-                break;
+                padAddresses.add(PAD_6X0_LED_ADDRESS);
+                return padAddresses;
             case PAD_7X0:
-                setLedIllumination(PAD_7X0_LED_ADDRESS, on);
-                break;
+                padAddresses.add(PAD_7X0_LED_ADDRESS);
+                return padAddresses;
             case PAD_0X1:
-                for (Byte pad0x1Address : PAD_0X1_ADDRESS) {
-                    setLedIllumination(pad0x1Address, on);
-                }
-                break;
+                return PAD_0X1_LED_ADDRESS;
             case PAD_1X1:
-                for (Byte padAddress : PAD_1X1_ADDRESS) {
-                    setLedIllumination(padAddress, on);
-                }
-                break;
+                return PAD_1X1_LED_ADDRESS;
             case PAD_2X1:
-                for (Byte padAddress : PAD_2X1_ADDRESS) {
-                    setLedIllumination(padAddress, on);
-                }
-                break;
+                return PAD_2X1_LED_ADDRESS;
             case PAD_3X1:
-                for (Byte padAddress : PAD_3X1_ADDRESS) {
-                    setLedIllumination(padAddress, on);
-                }
-                break;
+                return PAD_3X1_LED_ADDRESS;
             case PAD_4X1:
-                for (Byte padAddress : PAD_4X1_ADDRESS) {
-                    setLedIllumination(padAddress, on);
-                }
-                break;
+                return PAD_4X1_LED_ADDRESS;
             case PAD_5X1:
-                for (Byte padAddress : PAD_5X1_ADDRESS) {
-                    setLedIllumination(padAddress, on);
-                }
-                break;
+                return PAD_5X1_LED_ADDRESS;
             case PAD_6X1:
-                for (Byte padAddress : PAD_6X1_ADDRESS) {
-                    setLedIllumination(padAddress, on);
-                }
-                break;
+                return PAD_6X1_LED_ADDRESS;
             case PAD_7X1:
-                for (Byte padAddress : PAD_7X1_ADDRESS) {
-                    setLedIllumination(padAddress, on);
-                }
-                break;
+                return PAD_7X1_LED_ADDRESS;
         }
+        return null;
     }
 
     /**

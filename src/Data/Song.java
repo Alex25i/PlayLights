@@ -3,23 +3,32 @@ package Data;
 import Midi.MixTrackController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Song {
 
-    public String name;
-    public String interpret;
-    public int tempo;
-    public ArrayList<UserEvent> userEvents;
+    private String name;
+    private String interpret;
+    private int tempo;
+    private List<UserEvent> userEvents;
+    private Map<MixTrackController.PAD, Runnable> padActions;
 
     public Song(String name, String interpret, int tempo) {
         this.name = name;
         this.interpret = interpret;
         this.tempo = tempo;
         this.userEvents = new ArrayList<>();
+        padActions = new HashMap<>(16);
     }
 
     public void addUserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad, Runnable eventAction) {
         userEvents.add(new UserEvent(name, eventTime, triggerPad, eventAction));
+    }
+
+    public void addPadAction(MixTrackController.PAD pad, Runnable action) {
+        padActions.put(pad, action);
     }
 
     public String getName() {

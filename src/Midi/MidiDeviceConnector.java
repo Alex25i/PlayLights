@@ -81,7 +81,7 @@ public class MidiDeviceConnector {
             @Override
             public void send(MidiMessage message, long timeStamp) {
                 if (open) {
-                    MidiController.getMidiController().precessMessage(message, timeStamp);
+                    MidiOrganizer.getMidiOrganizer().processMessage(message, timeStamp);
                 }
             }
 
