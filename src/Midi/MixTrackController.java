@@ -213,6 +213,7 @@ public class MixTrackController {
      * @param ledID the LED which to be turned on or off
      * @param on    defines weather the LED should be on or off
      */
+    //TODO: Refactor: Use @MidiOrganizer.createMidiMessage()
     public void setLedIllumination(byte ledID, boolean on) {
         byte[] midiMessage = new byte[3];
         midiMessage[0] = MidiOrganizer.MESSAGE_TYPE_NODE;
@@ -226,7 +227,7 @@ public class MixTrackController {
         ShortMessage testMessage = new ShortMessage();
         try {
             testMessage.setMessage(midiMessage[0], midiMessage[1], midiMessage[2]);
-            MidiOrganizer.getMidiOrganizer().getMidiDeviceConnector().getReceiver().send(testMessage, -1);
+            MidiOrganizer.getMidiOrganizer().getMixTrackDeviceConnector().getReceiver().send(testMessage, -1);
         } catch (InvalidMidiDataException e) {
             e.printStackTrace();
         }

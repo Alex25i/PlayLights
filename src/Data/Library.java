@@ -30,7 +30,12 @@ public class Library {
         });
 
         // Pad Actions
+        hyrm.addPadAction(MixTrackController.PAD.PAD_0X0, new Runnable() {
+            @Override
+            public void run() {
 
+            }
+        });
 
         return hyrm;
     }

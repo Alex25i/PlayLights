@@ -11,6 +11,7 @@ public class MidiDeviceConnector {
 
     private Transmitter transmitter = null;
     private Receiver receiver = null;
+    private String deviceName = "";
 
     public MidiDeviceConnector(String devNamePart) {
 
@@ -19,15 +20,19 @@ public class MidiDeviceConnector {
         MidiDevice device = null;
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         boolean found = false;
+
         for (MidiDevice.Info info : infos) {
             try {
                 device = MidiSystem.getMidiDevice(info);
-                System.out.println(device.getDeviceInfo().getName());
+                if (MidiOrganizer.verbose) {
+                    System.out.println("Available device: " + device.getDeviceInfo().getName());
+                }
             } catch (MidiUnavailableException e) {
                 // Handle or throw exception...
             }
             if (device.getDeviceInfo().getName().toLowerCase().contains(devNamePart.toLowerCase())) {
                 found = true;
+                deviceName = device.getDeviceInfo().getName();
                 try {
                     device.open();
                 } catch (MidiUnavailableException e) {
@@ -47,10 +52,17 @@ public class MidiDeviceConnector {
             }
         }
 
+        if (found && MidiOrganizer.verbose) {
+            System.out.println("Connection with " + deviceName + " established.");
+        }
+
         if (!found) {
-            new IllegalStateException("ERROR: No Device which contains " + devNamePart + " in its name found!").printStackTrace();
+            if (MidiOrganizer.verbose) {
+                new IllegalStateException("ERROR: No Device which contains " + devNamePart + " in its name found!").printStackTrace();
+            }
             return;
         }
+
         MidiDevice md = getMidiDevice();
         Receiver mdR = null;
         Transmitter mdT = null;
@@ -66,10 +78,9 @@ public class MidiDeviceConnector {
         }
         transmitter.setReceiver(mdR);
         mdT.setReceiver(receiver);
-        System.out.println("Finished!");
     }
 
-    private static Receiver getMidiReceiver(MidiDevice ownerOfReceiver) {
+    private  Receiver getMidiReceiver(MidiDevice ownerOfReceiver) {
         return new MidiDeviceReceiver() {
             private boolean open = true;
 
@@ -81,7 +92,7 @@ public class MidiDeviceConnector {
             @Override
             public void send(MidiMessage message, long timeStamp) {
                 if (open) {
-                    MidiOrganizer.getMidiOrganizer().processMessage(message, timeStamp);
+                    MidiOrganizer.getMidiOrganizer().processMixTrackMessage(message, timeStamp, deviceName);
                 }
             }
 
@@ -92,7 +103,7 @@ public class MidiDeviceConnector {
         };
     }
 
-    private static MidiDeviceTransmitter getTransMidiTransmitter(MidiDevice ownerOfTransmitter) {
+    private  MidiDeviceTransmitter getTransMidiTransmitter(MidiDevice ownerOfTransmitter) {
         return new MidiDeviceTransmitter() {
             private Receiver receiver;
 
@@ -118,7 +129,7 @@ public class MidiDeviceConnector {
         };
     }
 
-    private static MidiDevice getMidiDevice() {
+    private  MidiDevice getMidiDevice() {
         return new MidiDevice() {
             boolean isOpen = false;
             long openTime = System.currentTimeMillis();
