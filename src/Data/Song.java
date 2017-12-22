@@ -39,11 +39,15 @@ public class Song {
 
     private UserEvent getClosestEventOfPad(MixTrackController.PAD pad, BeatStamp time) {
         if (time == null) {
-            new NullPointerException("Can't calculate the closest Event to a null BeatStamp reverence").printStackTrace();
+            if (MidiOrganizer.verbose) {
+                new NullPointerException("Can't calculate the closest Event to a null BeatStamp reverence").printStackTrace();
+            }
             return null;
         }
         if (!padActions.containsKey(pad)) {
-            new NullPointerException("No user events registered for given event").printStackTrace();
+            if (MidiOrganizer.verbose) {
+                new NullPointerException("No user events registered for given event").printStackTrace();
+            }
             return null;
         }
 
@@ -67,7 +71,9 @@ public class Song {
      */
     private int getBeatDistance(BeatStamp beatStamp1, BeatStamp beatStamp2) {
         if (beatStamp1 == null || beatStamp2 == null) {
-            new NullPointerException("Beat distance calculation on null object reverence").printStackTrace();
+            if (MidiOrganizer.verbose) {
+                new NullPointerException("Beat distance calculation on null object reverence").printStackTrace();
+            }
             return -1;
         }
         return Math.abs((beatStamp1.getBarNr() * beatsPerBar + beatStamp1.getBeatNr())

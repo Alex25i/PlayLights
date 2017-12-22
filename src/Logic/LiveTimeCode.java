@@ -26,7 +26,7 @@ public class LiveTimeCode {
 
 
     public void start(BeatStamp beatStamp) {
-        if (tempo < 0) {
+        if (tempo < 0 && MidiOrganizer.verbose) {
             throw new IllegalStateException("The tempo is not set or incorrect ");
         }
         syncNow(beatStamp);
@@ -68,7 +68,7 @@ public class LiveTimeCode {
             // run time is in past
             return;
         }
-        if (!isStarted()) {
+        if (!isStarted() && MidiOrganizer.verbose) {
             new IllegalStateException("Can't trigger a code on a not running beat code").printStackTrace();
             System.err.println("Requested run time:\nBar " + runAtBeat.getBarNr() + " Beat: " + runAtBeat.getBeatNr());
         }
