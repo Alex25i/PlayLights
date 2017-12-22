@@ -10,12 +10,13 @@ public class LiveTimeCode {
     private Long reverenceTime;
     private BeatStamp reverencePosition;
 
-    private int beatsPerBar;
     private int tempo = -1; // timeCodeTempo in bpm
+    private int beatsPerBar;
+
 
     private List<Thread> sleepingThreads;
 
-    public LiveTimeCode(int beatsPerBar, int tempo, List<Thread> sleepingThreads) {
+    public LiveTimeCode(int tempo, int beatsPerBar, List<Thread> sleepingThreads) {
         this.reverenceTime = reverenceTime;
         this.reverencePosition = reverencePosition;
         this.beatsPerBar = beatsPerBar;
