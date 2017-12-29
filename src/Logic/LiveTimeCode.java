@@ -1,27 +1,29 @@
 package Logic;
 
 import Data.BeatStamp;
+import Data.Song;
 import Midi.MidiOrganizer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LiveTimeCode {
 
-    private Long reverenceTime;
-    private BeatStamp reverencePosition;
-
+    private Long reverenceTime = null;
+    private BeatStamp reverencePosition = null;
     private int tempo = -1; // timeCodeTempo in bpm
+
+    private Song currentSong;
     private int beatsPerBar;
 
 
     private List<Thread> sleepingThreads;
 
-    public LiveTimeCode(int tempo, int beatsPerBar, List<Thread> sleepingThreads) {
-        this.reverenceTime = reverenceTime;
-        this.reverencePosition = reverencePosition;
-        this.beatsPerBar = beatsPerBar;
-        this.tempo = tempo;
-        this.sleepingThreads = sleepingThreads;
+    public LiveTimeCode(Song currentSong) {
+        this.currentSong = currentSong;
+        this.beatsPerBar = currentSong.getBeatsPerBar();
+        setTempo(currentSong.getTempo());
+        this.sleepingThreads = new ArrayList<>();
     }
 
 
@@ -35,6 +37,10 @@ public class LiveTimeCode {
 
     public void stop() {
         reverenceTime = null;
+        for (Thread sleepingThread : sleepingThreads) {
+            sleepingThread.interrupt();
+        }
+        sleepingThreads.clear();
     }
 
     public boolean isStarted() {
@@ -80,12 +86,12 @@ public class LiveTimeCode {
 
                 boolean removed = sleepingThreads.remove(Thread.currentThread());
                 if (!removed && MidiOrganizer.verbose) {
-                    new Exception("Sleeping thread could not got removed from @sleepingThreads\n" +
+                    new Exception("Sleeping thread could not be removed from @sleepingThreads\n" +
                             "Check your implementation why this is the case! (Sleeping until @BeatStamp: Bar="
                             + runAtBeat.getBarNr() + " Beat=" + runAtBeat.getBeatNr() + ")").printStackTrace();
                 }
 
-                // @runThis could run in the same thread as the waiting was before, so the runnable an be executed in this thread
+                // @runThis could run in the same thread as the waiting was before, so the runnable can be executed in this thread
                 runThis.run();
             } catch (InterruptedException e) {
                 // thread gets interrupted if the TimeCode got reSynced.
@@ -151,17 +157,13 @@ public class LiveTimeCode {
         return beatsPerBar;
     }
 
-    public void setBeatsPerBar(int beatsPerBar) {
-        this.beatsPerBar = beatsPerBar;
-    }
-
     public int getTempo() {
         return tempo;
     }
 
     public void setTempo(int tempo) {
         if (tempo <= 0 || tempo > 300) {
-            new IllegalArgumentException("Check the tempo. Its unlikely " + tempo).printStackTrace();
+            new IllegalArgumentException("Check the tempo. Its unlikely correct" + tempo).printStackTrace();
         }
 
         this.tempo = tempo;

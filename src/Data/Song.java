@@ -14,16 +14,24 @@ public class Song {
     private String interpret;
     private int tempo;
     private int beatsPerBar;
+
+    private BeatStamp lastBeat;
     private List<UserEvent> userEvents;
     private Map<MixTrackController.PAD, PadAction> padActions;
+    // pad at which the player will automatically trigger the beginning of the song (if it is loaded)
+    // Can be null, if this feature is not desired for the song (manual start required)
+    private MixTrackController.PAD autoStartPad;
 
-    public Song(String name, String interpret, int tempo, int beatsPerBar) {
+    public Song(String name, String interpret, int tempo, int beatsPerBar, BeatStamp lastBeat,
+                MixTrackController.PAD autoStartPad) {
         this.name = name;
         this.interpret = interpret;
         this.tempo = tempo;
         this.userEvents = new ArrayList<>();
         this.beatsPerBar = beatsPerBar;
         padActions = new HashMap<>(16);
+        this.lastBeat = lastBeat;
+        this.autoStartPad = autoStartPad;
     }
 
     public void addUserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad, Runnable eventAction) {
@@ -32,12 +40,13 @@ public class Song {
 
     public void addPadAction(MixTrackController.PAD pad, Runnable action) {
         if (MidiOrganizer.verbose && padActions.containsKey(pad)) {
-            new IllegalStateException("There is already an action registered for the pad " + pad.toString()).printStackTrace();
+            new IllegalStateException("There is already an action registered for the pad "
+                    + pad.toString()).printStackTrace();
         }
         padActions.put(pad, new PadAction(pad, action));
     }
 
-    private UserEvent getClosestEventOfPad(MixTrackController.PAD pad, BeatStamp time) {
+    public UserEvent getClosestEventOfPad(MixTrackController.PAD pad, BeatStamp time) {
         if (time == null) {
             if (MidiOrganizer.verbose) {
                 new NullPointerException("Can't calculate the closest Event to a null BeatStamp reverence").printStackTrace();
@@ -69,7 +78,7 @@ public class Song {
      * @param beatStamp2 second @{@link BeatStamp} for delta calculation
      * @return the amount of beats between the two given @{@link BeatStamp}s
      */
-    private int getBeatDistance(BeatStamp beatStamp1, BeatStamp beatStamp2) {
+    public int getBeatDistance(BeatStamp beatStamp1, BeatStamp beatStamp2) {
         if (beatStamp1 == null || beatStamp2 == null) {
             if (MidiOrganizer.verbose) {
                 new NullPointerException("Beat distance calculation on null object reverence").printStackTrace();
@@ -84,31 +93,39 @@ public class Song {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getInterpret() {
         return interpret;
-    }
-
-    public void setInterpret(String interpret) {
-        this.interpret = interpret;
     }
 
     public int getTempo() {
         return tempo;
     }
 
-    public void setTempo(int tempo) {
-        this.tempo = tempo;
+    public int getBeatsPerBar() {
+        return beatsPerBar;
+    }
+
+    public BeatStamp getLastBeat() {
+        return lastBeat;
+    }
+
+    public List<UserEvent> getUserEvents() {
+        return userEvents;
+    }
+
+    public Map<MixTrackController.PAD, PadAction> getPadActions() {
+        return padActions;
+    }
+
+    public MixTrackController.PAD getAutoStartPad() {
+        return autoStartPad;
     }
 
     /**
      * a user event is one time event in a song where the user as to press a @{@link Midi.MixTrackController.PAD} in
      * order to trigger a @{@link PadAction}
      */
-    private class UserEvent {
+    public class UserEvent implements Comparable {
         private String name;
         private BeatStamp eventTime;
         private MixTrackController.PAD triggerPad;
@@ -120,13 +137,77 @@ public class Song {
             this.triggerPad = triggerPad;
             this.eventAction = eventAction;
         }
+
+        /**
+         * Compares this object with the specified object for order.  Returns a
+         * negative integer, zero, or a positive integer as this object is less
+         * than, equal to, or greater than the specified object.
+         * <p>
+         * <p>The implementor must ensure <tt>sgn(x.compareTo(y)) ==
+         * -sgn(y.compareTo(x))</tt> for all <tt>x</tt> and <tt>y</tt>.  (This
+         * implies that <tt>x.compareTo(y)</tt> must throw an exception iff
+         * <tt>y.compareTo(x)</tt> throws an exception.)
+         * <p>
+         * <p>The implementor must also ensure that the relation is transitive:
+         * <tt>(x.compareTo(y)&gt;0 &amp;&amp; y.compareTo(z)&gt;0)</tt> implies
+         * <tt>x.compareTo(z)&gt;0</tt>.
+         * <p>
+         * <p>Finally, the implementor must ensure that <tt>x.compareTo(y)==0</tt>
+         * implies that <tt>sgn(x.compareTo(z)) == sgn(y.compareTo(z))</tt>, for
+         * all <tt>z</tt>.
+         * <p>
+         * <p>It is strongly recommended, but <i>not</i> strictly required that
+         * <tt>(x.compareTo(y)==0) == (x.equals(y))</tt>.  Generally speaking, any
+         * class that implements the <tt>Comparable</tt> interface and violates
+         * this condition should clearly indicate this fact.  The recommended
+         * language is "Note: this class has a natural ordering that is
+         * inconsistent with equals."
+         * <p>
+         * <p>In the foregoing description, the notation
+         * <tt>sgn(</tt><i>expression</i><tt>)</tt> designates the mathematical
+         * <i>signum</i> function, which is defined to return one of <tt>-1</tt>,
+         * <tt>0</tt>, or <tt>1</tt> according to whether the value of
+         * <i>expression</i> is negative, zero or positive.
+         *
+         * @param o the object to be compared.
+         * @return a negative integer, zero, or a positive integer as this object
+         * is less than, equal to, or greater than the specified object.
+         * @throws NullPointerException if the specified object is null
+         * @throws ClassCastException   if the specified object's type prevents it
+         *                              from being compared to this object.
+         */
+        @Override
+        public int compareTo(Object o) {
+            UserEvent givenUserEvent = ((UserEvent) o);
+            int beatsTotalThisObject = eventTime.getBarNr() * beatsPerBar + eventTime.getBeatNr();
+            int beatsTotalGivenObject = givenUserEvent.getEventTime().getBarNr() * beatsPerBar
+                    + givenUserEvent.getEventTime().getBeatNr();
+
+            return beatsTotalThisObject - beatsTotalGivenObject;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public BeatStamp getEventTime() {
+            return eventTime;
+        }
+
+        public MixTrackController.PAD getTriggerPad() {
+            return triggerPad;
+        }
+
+        public Runnable getEventAction() {
+            return eventAction;
+        }
     }
 
     /**
      * a pad action is the action which occurs when the user pressed a @{@link Midi.MixTrackController.PAD}
      * it defined the action which should be triggered by pressing the pad
      */
-    private class PadAction {
+    public class PadAction {
         private MixTrackController.PAD triggerPad;
         private ArrayList<UserEvent> userEvents;
         private Runnable action;
@@ -139,6 +220,18 @@ public class Song {
 
         private boolean isActionOfEvent(UserEvent userEvent) {
             return userEvents.contains(userEvent);
+        }
+
+        public MixTrackController.PAD getTriggerPad() {
+            return triggerPad;
+        }
+
+        public ArrayList<UserEvent> getUserEvents() {
+            return userEvents;
+        }
+
+        public Runnable getAction() {
+            return action;
         }
     }
 

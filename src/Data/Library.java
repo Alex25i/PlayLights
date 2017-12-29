@@ -3,14 +3,26 @@ package Data;
 import Midi.MixTrackController;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Library {
 
-    private static ArrayList<Song> songList;
-    private static ArrayList<Gig> gigList;
+    private List<Song> songList;
+    private List<Gig> gigList;
+
+    public Library() {
+        songList = new ArrayList<>();
+        gigList = new ArrayList<>();
+        createSongs();
+    }
+
+    private void createSongs() {
+        songList.add(createHowYouRemindMe());
+    }
 
     private Song createHowYouRemindMe() {
-        Song hyrm = new Song("How you remind me", "Nickelback", 172);
+        Song hyrm = new Song("How you remind me", "Nickelback", 172, 4,
+                new BeatStamp(100, 1), MixTrackController.PAD.PAD_0X0);
 
         // User Events
         BeatStamp beatStamp = new BeatStamp(7, 1);
@@ -40,19 +52,11 @@ public class Library {
         return hyrm;
     }
 
-    public static ArrayList<Song> getSongList() {
+    public List<Song> getSongList() {
         return songList;
     }
 
-    public static void setSongList(ArrayList<Song> songList) {
-        Library.songList = songList;
-    }
-
-    public static ArrayList<Gig> getGigList() {
+    public List<Gig> getGigList() {
         return gigList;
-    }
-
-    public static void setGigList(ArrayList<Gig> gigList) {
-        Library.gigList = gigList;
     }
 }
