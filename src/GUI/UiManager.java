@@ -1,6 +1,7 @@
 package GUI;
 
 import Logic.PlayLights;
+import Logic.SongPlayer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -40,9 +41,13 @@ public class UiManager extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        //new SongPlayerController(this);
+        // TODO: Move this to an appropriate location
         new PlayLights(this);
+        SongPlayer songPlayer = new SongPlayer(PlayLights.getPlayLights().getLibrary().getSongList().get(0));
+    }
 
+    public Stage getPrimaryStage() {
+        return primaryStage;
     }
 
     public static void main(String[] args) {

@@ -1,6 +1,7 @@
 package Logic;
 
 import Data.Song;
+import GUI.SongPlayerController;
 import Midi.MidiOrganizer;
 import Midi.MixTrackController;
 
@@ -9,12 +10,20 @@ import java.util.ArrayList;
 public class SongPlayer {
     private Song currentSong;
     private LiveTimeCode timeCode;
-    private TempoRecognition tempoRecognition;
+    private TempoRecognition tempoRecognition; // currently not used
 
 
     public SongPlayer(Song currentSong) {
         this.currentSong = currentSong;
         timeCode = new LiveTimeCode(currentSong);
+
+        if (SongPlayerController.getSongPlayerController() != null) {
+            SongPlayerController.getSongPlayerController().prepare(currentSong, timeCode);
+            SongPlayerController.getSongPlayerController().startCanvasAnimation();
+        } else {
+            new IllegalStateException("Can't prepare SongPlayerController: It is not instanced yet. " +
+                    "Check your implementation!").printStackTrace();
+        }
     }
 
     /**
@@ -47,5 +56,17 @@ public class SongPlayer {
 
         timeCode.syncNow(currentSong.getClosestEventOfPad(pad, timeCode.calcCurrentBeat()).getEventTime());
         padAction.getAction().run();
+    }
+
+    public Song getCurrentSong() {
+        return currentSong;
+    }
+
+    public LiveTimeCode getTimeCode() {
+        return timeCode;
+    }
+
+    public TempoRecognition getTempoRecognition() {
+        return tempoRecognition;
     }
 }
