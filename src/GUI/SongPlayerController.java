@@ -2,78 +2,67 @@ package GUI;
 
 import Data.BeatStamp;
 import Data.Song;
-import Logic.LiveTimeCode;
-import javafx.animation.Animation;
+import Logic.SongPlayer;
+import javafx.animation.AnimationTimer;
 import javafx.animation.Interpolator;
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
-import javafx.geometry.Dimension2D;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 public class SongPlayerController {
 
-    private static Dimension2D WINDOW_SIZE_DEFAULT;
-
     private static SongPlayerController songPlayerController;
 
-    private LiveTimeCode songTimeCode;
-    private Song song;
-    private int somingFactor = 1;
+    private SongPlayer player;
+    private double zoomFactor = 1;
 
     private TranslateTransition songAnimation;
 
     @FXML
-    private Pane rootPane;
-    @FXML
-    private Canvas songCanvas;
-    @FXML
-    private Canvas staticOverlay;
+    Pane rootPane;
 
-
-    static {
-        WINDOW_SIZE_DEFAULT = new Dimension2D(800, 600);
-    }
+    Group songGrid;
 
     @FXML
     public void initialize() {
         songPlayerController = this;
         songAnimation = new TranslateTransition();
+        songGrid = new Group();
     }
 
-    public void prepare(Song song, LiveTimeCode liveTimeCode) {
-        this.song = song;
-        this.songTimeCode = liveTimeCode;
-        prepareCanvas();
+    public void prepare(SongPlayer songPlayer) {
+        player = songPlayer;
 
+        rootPane.setStyle("-fx-background-color: #000;");
+        drawSongGrid();
+        drawStaticOverlay();
 
-        drawSongCanvasGrid();
-        drawStaticCanvas();
+        songAnimation.setNode(songGrid);
+        songAnimation.setInterpolator(Interpolator.LINEAR);
+        songAnimation.setFromY(0);
+        songAnimation.setByY(0);
+        songAnimation.setCycleCount(1);
+
+        animate();
     }
 
-    public void startCanvasAnimation() {
+    public void startAnimation() {
         //songAnimation.setFromX(songCanvas.getWidth() / 2);
         //songAnimation.setByX(songCanvas.getWidth());
-        //songAnimation.setDuration(Duration.seconds(calcTotalBeatCoutFromSong() / 120 * 60)); //TODO: calc correct playback speed
-
-
-        songAnimation.setNode(songCanvas);
-        songAnimation.setInterpolator(Interpolator.LINEAR);
-
+        int duration = (int) (calcTotalBeatCountFromSong() / (double) player.getTimeCode().getTempo() * 60 * 1000);
+        songAnimation.setDuration(Duration.millis(duration)); //TODO: calc correct playback speed
+        int xCoordinates = (int) ((calcTotalBeatCountFromSong() - 1) * zoomFactor * 20);
         songAnimation.setFromX(0);
-        songAnimation.setFromY(0);
-        songAnimation.setByX(-2000);
-        songAnimation.setByY(0);
-        songAnimation.setDuration(Duration.seconds(40));
-        songAnimation.setCycleCount(Animation.INDEFINITE);
-//        songAnimation.setAutoReverse(false);
+        songAnimation.setByX(-xCoordinates - 50); // a little bit behind last beat
         songAnimation.play();
     }
 
-    public void startCanvasAnimation(BeatStamp songPosition) {
+    public void startAnimation(BeatStamp songPosition) {
 
     }
 
@@ -82,74 +71,69 @@ public class SongPlayerController {
     }
 
 
-    private void drawTestGraphics() {
-        GraphicsContext gc = songCanvas.getGraphicsContext2D();
-
-        gc.setLineWidth(1);
-        gc.setStroke(Color.GRAY);
-        gc.setFill(Color.GRAY);
-        gc.strokeLine(1.5 * 200 + 10, 0, 1.5 * 200 + 10, 200);
-        gc.setLineWidth(1.5);
-        for (int i = 0; i <= 6; i++) {
-            gc.strokeLine(i * 200 + 10, 0, i * 200 + 10, 200);
-        }
-
-        TranslateTransition tt = new TranslateTransition();
-        tt.setDuration(Duration.seconds(5));
-        tt.setNode(songCanvas);
-        tt.setInterpolator(Interpolator.LINEAR);
-        tt.setCycleCount(Animation.INDEFINITE);
-        tt.setFromX(0);
-        tt.setFromY(0);
-        tt.setByX(-600);
-        tt.setByY(0);
-        tt.play();
+    private void drawStaticOverlay() {
+        int midLinePositionX = (int) (rootPane.getWidth() / 2);
+        Line line = new Line(midLinePositionX, 0, midLinePositionX, 200);
+        line.setStroke(Color.RED);
+        line.setStrokeWidth(2);
+        rootPane.getChildren().add(line);
     }
 
-    /**
-     * prepares the song canvas layout and draws it
-     */
-    private void prepareCanvas() {
-        int canvasSize = calcTotalBeatCoutFromSong() * somingFactor * 20;
-        canvasSize = 2000; //TODO: Only for testing Delete afterwards
-        songCanvas.setWidth(canvasSize);
-        songCanvas.setLayoutY(0);
-        songCanvas.setLayoutX(rootPane.getWidth() / 2);
+    private void drawSongGrid() {
+        int xStartOffset = (int) rootPane.getWidth() / 2;
 
-        // TODO: paste static song animation init here
-        rootPane.setStyle("-fx-background-color: #444;");
-    }
+        for (int beat = 0; beat < calcTotalBeatCountFromSong(); beat++) {
+            Line gridLine = new Line();
+            if (beat % player.getCurrentSong().getBeatsPerBar() == 0) {
+                gridLine.setStroke(Color.WHITE);
+                gridLine.setStrokeWidth(1.5);
+                gridLine.setStartY(0);
 
-    private void drawStaticCanvas() {
-        GraphicsContext gc = staticOverlay.getGraphicsContext2D();
-
-        gc.setLineWidth(3);
-        gc.setStroke(Color.RED);
-
-        int midLinePositionX = (int) (staticOverlay.getWidth() / 2);
-        gc.strokeLine(midLinePositionX, 0, midLinePositionX, staticOverlay.getHeight());
-    }
-
-    private void drawSongCanvasGrid() {
-        GraphicsContext gc = songCanvas.getGraphicsContext2D();
-        gc.setLineWidth(1);
-
-
-        for (int beat = 0; beat < calcTotalBeatCoutFromSong(); beat++) {
-            if (beat % song.getBeatsPerBar() == 0) {
-                gc.setStroke(Color.WHITE);
-                gc.setLineWidth(1.5);
+                //Bar nr at each beginning of the bar
+                int barNr = beat / player.getCurrentSong().getBeatsPerBar() + 1;
+                Text barNrLb = new Text(String.valueOf(barNr));
+                barNrLb.setStroke(Color.GRAY);
+                barNrLb.setX(beat * zoomFactor * 20 + 5 + xStartOffset);
+                barNrLb.setY(15);
+                songGrid.getChildren().add(barNrLb);
             } else {
-                gc.setStroke(Color.LIGHTGRAY);
-                gc.setLineWidth(0.2);
+
+                gridLine.setStroke(Color.WHITE);
+                gridLine.setStrokeWidth(0.3);
+                gridLine.setStartY(25);
             }
-            gc.strokeLine(beat * somingFactor * 20, 0, beat * somingFactor * 20, songCanvas.getHeight());
+            int xCoordinates = (int) (beat * zoomFactor * 20);
+            gridLine.setStartX(xCoordinates + xStartOffset);
+
+            gridLine.setEndX(xCoordinates + xStartOffset);
+            gridLine.setEndY(200);
+            songGrid.getChildren().add(gridLine);
+
+//            Line separationLineHor = new Line(xStartOffset, 25, (calcTotalBeatCountFromSong() - 1) * 20 + xStartOffset, 25);
+//            separationLineHor.setStroke(Color.LIGHTGRAY);
+//            separationLineHor.setStrokeWidth(0.004);
+//            songGrid.getChildren().add(separationLineHor);
         }
-        gc.setLineWidth(1.5);
+
+
+        rootPane.getChildren().add(songGrid);
     }
 
-    private int calcTotalBeatCoutFromSong() {
-        return (song.getLastBeat().getBarNr() - 1) * song.getBeatsPerBar() + song.getLastBeat().getBeatNr() - 1;
+    private void animate() {
+        AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                System.out.println(now);
+                System.out.println(System.currentTimeMillis());
+                System.out.println("");
+            }
+        };
+        timer.start();
+    }
+
+    private int calcTotalBeatCountFromSong() {
+        Song song = player.getCurrentSong();
+        return (song.getLastBeat().getBarNr() - 1) * song.getBeatsPerBar() + song.getLastBeat().getBeatNr();
     }
 
 

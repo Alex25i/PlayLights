@@ -18,11 +18,11 @@ public class SongPlayer {
         timeCode = new LiveTimeCode(currentSong);
 
         if (SongPlayerController.getSongPlayerController() != null) {
-            SongPlayerController.getSongPlayerController().prepare(currentSong, timeCode);
-            SongPlayerController.getSongPlayerController().startCanvasAnimation();
+            SongPlayerController.getSongPlayerController().prepare(this);
+            SongPlayerController.getSongPlayerController().startAnimation();
         } else {
             new IllegalStateException("Can't prepare SongPlayerController: It is not instanced yet. " +
-                    "Check your implementation!").printStackTrace();
+                    "Check your implementation! Is the the controller class set in the fxml file?").printStackTrace();
         }
     }
 
