@@ -22,7 +22,7 @@ public class Library {
 
     private Song createHowYouRemindMe() {
         Song hyrm = new Song("How you remind me", "Nickelback", 172, 4,
-                new BeatStamp(5, 1), MixTrackController.PAD.PAD_0X0);
+                new BeatStamp(80, 1), MixTrackController.PAD.PAD_0X0);
 
         // User Events
         BeatStamp beatStamp = new BeatStamp(7, 1);

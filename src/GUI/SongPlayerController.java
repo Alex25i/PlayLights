@@ -1,6 +1,7 @@
 package GUI;
 
 import Data.BeatStamp;
+import Data.Song;
 import Logic.SongPlayer;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
@@ -8,7 +9,12 @@ import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
+
+import java.util.List;
 
 public class SongPlayerController {
 
@@ -37,6 +43,7 @@ public class SongPlayerController {
 
         rootPane.setStyle("-fx-background-color: #000;");
         drawSongGrid();
+        drawUserEventMarker();
         drawStaticOverlay();
 
         prepareAnimation(songEnd);
@@ -49,6 +56,13 @@ public class SongPlayerController {
             @Override
             public void handle(long now) {
                 final long currentTime = System.currentTimeMillis();
+
+                if (player.getTimeCode() == null || !player.getTimeCode().isStarted()) {
+                    new IllegalStateException("Can't play the song animation." +
+                            "Start a corresponding timeCode instance first!").printStackTrace();
+                    stopAnimation();
+                    return;
+                }
 
                 // time passed in milliseconds since the last time code sync was triggered
                 final long timeSinceLastSync = currentTime - player.getTimeCode().getReverenceTime();
@@ -104,32 +118,90 @@ public class SongPlayerController {
 
         for (int beat = 0; beat < player.getCurrentSong().calcTotalBeatCount(); beat++) {
             Line gridLine = new Line();
+            int xCoordinates = (int) (beat * zoomFactor * 20);
             if (beat % player.getCurrentSong().getBeatsPerBar() == 0) {
-                gridLine.setStroke(Color.WHITE);
-                gridLine.setStrokeWidth(1.5);
+
+                // white line, first beat of the bar
+                gridLine.setStroke(new Color(.5, .5, .5, 1));
+                gridLine.setStrokeWidth(2);
                 gridLine.setStartY(0);
+                gridLine.setStartX(xCoordinates + xStartOffset);
+                gridLine.setEndX(xCoordinates + xStartOffset);
 
                 //Bar nr at each beginning of the bar
                 int barNr = beat / player.getCurrentSong().getBeatsPerBar() + 1;
                 Text barNrLb = new Text(String.valueOf(barNr));
-                barNrLb.setStroke(Color.GRAY);
+                barNrLb.setStroke(new Color(.5, .5, .5, 1));
                 barNrLb.setX(beat * zoomFactor * 20 + 5 + xStartOffset);
                 barNrLb.setY(15);
                 songGrid.getChildren().add(barNrLb);
             } else {
-
+                // gray line, beat within a bar
                 gridLine.setStroke(Color.WHITE);
                 gridLine.setStrokeWidth(0.3);
                 gridLine.setStartY(25);
+                gridLine.setStartX(xCoordinates + xStartOffset + .5);
+                gridLine.setEndX(xCoordinates + xStartOffset + .5);
             }
-            int xCoordinates = (int) (beat * zoomFactor * 20);
-            gridLine.setStartX(xCoordinates + xStartOffset);
-
-            gridLine.setEndX(xCoordinates + xStartOffset);
             gridLine.setEndY(200);
             songGrid.getChildren().add(gridLine);
         }
         rootPane.getChildren().add(songGrid);
+    }
+
+    private void drawUserEventMarker() {
+        final int xStartOffset = (int) rootPane.getWidth() / 2;
+        final List<Song.UserEvent> userEvents = player.getCurrentSong().getUserEvents();
+        for (Song.UserEvent userEvent : userEvents) {
+            final BeatStamp beatPos = userEvent.getEventTime();
+            final int pxPos = (int) (player.getCurrentSong().calcBeatDistance(new BeatStamp(1, 1), beatPos)
+                    * zoomFactor * 20) + xStartOffset;
+
+            //line
+            Line markerLine = new Line(pxPos, 40, pxPos, 190);
+            markerLine.setStrokeWidth(2);
+            markerLine.setStroke(Color.FORESTGREEN);
+
+            songGrid.getChildren().add(markerLine);
+
+            //Triangle at the bottom of the marker
+            Polygon markerStand = new Polygon();
+            markerStand.getPoints().addAll(pxPos - 12.0, 200.5,
+                    pxPos + 12.0, 200.5,
+                    (double) pxPos, 185.0);
+            markerStand.setStroke(Color.FORESTGREEN);
+            markerStand.setFill(Color.FORESTGREEN);
+            //markerStand.setStrokeType(StrokeType.OUTSIDE);
+            markerLine.setStrokeWidth(2);
+            songGrid.getChildren().add(markerStand);
+
+            //Sign of th marker
+            Rectangle markerSign = new Rectangle(pxPos - 25.5, 24.5, 26, 25);
+            markerSign.setFill(Color.FORESTGREEN);
+            markerSign.setStroke(Color.FORESTGREEN);
+            songGrid.getChildren().add(markerSign);
+
+            Text markerLetter;
+            if (userEvent.getName() != null && userEvent.getName().length() > 0) {
+                markerLetter = new Text(userEvent.getName().substring(0, 1));
+            } else {
+                markerLetter = new Text("?");
+            }
+            markerLetter.setX(pxPos - 21);
+            markerLetter.setY(45);
+
+            //markerLetter.setScaleX(1.5);
+            //markerLetter.setScaleY(1.5);
+
+            markerLetter.setStyle("-fx-font: 24 arial;");
+            markerLetter.setStroke(Color.WHITE);
+            markerLetter.setFill(Color.WHITE);
+            markerLetter.setStrokeType(StrokeType.INSIDE);
+            songGrid.getChildren().add(markerLetter);
+
+
+
+        }
     }
 
     public static SongPlayerController getSongPlayerController() {
