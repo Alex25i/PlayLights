@@ -1,5 +1,6 @@
 package Logic;
 
+import Data.BeatStamp;
 import Data.Song;
 import GUI.SongPlayerController;
 import Midi.MidiOrganizer;
@@ -17,8 +18,18 @@ public class SongPlayer {
         this.currentSong = currentSong;
         timeCode = new LiveTimeCode(currentSong);
 
+        // TODO: This not the final implementation
         if (SongPlayerController.getSongPlayerController() != null) {
-            SongPlayerController.getSongPlayerController().prepare(this);
+
+            SongPlayerController.getSongPlayerController().prepare(this, new Runnable() {
+                @Override
+                public void run() {
+                    SongPlayerController.getSongPlayerController().stopAnimation();
+                    //TODO: Inform User that song has ended
+                }
+            });
+
+            timeCode.start(new BeatStamp(1, 1));
             SongPlayerController.getSongPlayerController().startAnimation();
         } else {
             new IllegalStateException("Can't prepare SongPlayerController: It is not instanced yet. " +

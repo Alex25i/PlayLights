@@ -34,6 +34,31 @@ public class Song {
         this.autoStartPad = autoStartPad;
     }
 
+    /**
+     * calculates the time difference between two @{@link BeatStamp}s in beats
+     *
+     * @param beatStamp1 first @{@link BeatStamp} for delta calculation
+     * @param beatStamp2 second @{@link BeatStamp} for delta calculation
+     * @return the amount of beats between the two given @{@link BeatStamp}s
+     */
+    public int calcBeatDistance(BeatStamp beatStamp1, BeatStamp beatStamp2) {
+        if (beatStamp1 == null || beatStamp2 == null) {
+            if (MidiOrganizer.verbose) {
+                new NullPointerException("Beat distance calculation on null object reverence").printStackTrace();
+            }
+            return -1;
+        }
+        return Math.abs((beatStamp1.getBarNr() * beatsPerBar + beatStamp1.getBeatNr())
+                - (beatStamp2.getBarNr() * beatsPerBar + beatStamp2.getBeatNr()));
+    }
+
+    /**
+     * @return sum of the beats of the song in total
+     */
+    public int calcTotalBeatCount() {
+        return calcBeatDistance(new BeatStamp(1, 1), getLastBeat());
+    }
+
     public void addUserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad, Runnable eventAction) {
         userEvents.add(new UserEvent(name, eventTime, triggerPad, eventAction));
     }
@@ -63,30 +88,12 @@ public class Song {
         UserEvent closestEventOfPad = null;
         int closesDistance = Integer.MAX_VALUE;
         for (UserEvent userEvent : padActions.get(pad).userEvents) {
-            if (getBeatDistance(time, userEvent.eventTime) < closesDistance) {
-                closesDistance = getBeatDistance(time, userEvent.eventTime);
+            if (calcBeatDistance(time, userEvent.eventTime) < closesDistance) {
+                closesDistance = calcBeatDistance(time, userEvent.eventTime);
                 closestEventOfPad = userEvent;
             }
         }
         return closestEventOfPad;
-    }
-
-    /**
-     * calculates the time difference between two @{@link BeatStamp}s in beats
-     *
-     * @param beatStamp1 first @{@link BeatStamp} for delta calculation
-     * @param beatStamp2 second @{@link BeatStamp} for delta calculation
-     * @return the amount of beats between the two given @{@link BeatStamp}s
-     */
-    public int getBeatDistance(BeatStamp beatStamp1, BeatStamp beatStamp2) {
-        if (beatStamp1 == null || beatStamp2 == null) {
-            if (MidiOrganizer.verbose) {
-                new NullPointerException("Beat distance calculation on null object reverence").printStackTrace();
-            }
-            return -1;
-        }
-        return Math.abs((beatStamp1.getBarNr() * beatsPerBar + beatStamp1.getBeatNr())
-                - (beatStamp2.getBarNr() * beatsPerBar + beatStamp2.getBeatNr()));
     }
 
     public String getName() {

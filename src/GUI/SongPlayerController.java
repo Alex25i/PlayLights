@@ -1,18 +1,14 @@
 package GUI;
 
 import Data.BeatStamp;
-import Data.Song;
 import Logic.SongPlayer;
 import javafx.animation.AnimationTimer;
-import javafx.animation.Interpolator;
-import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
-import javafx.util.Duration;
 
 public class SongPlayerController {
 
@@ -21,68 +17,92 @@ public class SongPlayerController {
     private SongPlayer player;
     private double zoomFactor = 1;
 
-    private TranslateTransition songAnimation;
+    private AnimationTimer songGridAnimation;
 
     @FXML
     Pane rootPane;
 
-    Group songGrid;
+    private Group songGrid;
+    private Line positionIndicator;
+
 
     @FXML
     public void initialize() {
         songPlayerController = this;
-        songAnimation = new TranslateTransition();
         songGrid = new Group();
     }
 
-    public void prepare(SongPlayer songPlayer) {
+    public void prepare(SongPlayer songPlayer, Runnable songEnd) {
         player = songPlayer;
 
         rootPane.setStyle("-fx-background-color: #000;");
         drawSongGrid();
         drawStaticOverlay();
 
-        songAnimation.setNode(songGrid);
-        songAnimation.setInterpolator(Interpolator.LINEAR);
-        songAnimation.setFromY(0);
-        songAnimation.setByY(0);
-        songAnimation.setCycleCount(1);
+        prepareAnimation(songEnd);
+    }
 
-        animate();
+    private void prepareAnimation(Runnable songEnd) {
+        songGridAnimation = new AnimationTimer() {
+            final int songEndPos = (int) (-player.getCurrentSong().calcTotalBeatCount() * zoomFactor * 20 - 30);
+
+            @Override
+            public void handle(long now) {
+                final long currentTime = System.currentTimeMillis();
+
+                // time passed in milliseconds since the last time code sync was triggered
+                final long timeSinceLastSync = currentTime - player.getTimeCode().getReverenceTime();
+                // validate result
+                if (timeSinceLastSync <= 0) {
+                    new IllegalStateException("TimeCode Sync is in the future. " +
+                            "Check your implementation why this seems to be the case!").printStackTrace();
+                }
+
+                // time the song plays with the current tempo until the synced BeatStamp at the timeCode is reached.
+                final long timeToSyncedBeat = player.getCurrentSong().calcBeatDistance(
+                        new BeatStamp(1, 1), player.getTimeCode().getReverencePosition());
+
+                // time passed in milliseconds since the current song started, if the speed were always ath the current rate
+                final long theoreticalTimeSinceBeginning = timeToSyncedBeat + timeSinceLastSync;
+
+                final double millsPerBeat = (int) (1000 / ((double) player.getTimeCode().getTempo() / 60));
+                int animationPosition = (int) (-theoreticalTimeSinceBeginning / (double) millsPerBeat * zoomFactor * 20);
+
+                if (animationPosition != songGrid.getLayoutX()) {
+                    songGrid.setLayoutX(animationPosition);
+                }
+                // run the given code(songEnd) shortly after the song is finished
+
+                if (songGrid.getLayoutX() <= songEndPos) {
+                    //song ended
+                    songEnd.run();
+                }
+            }
+        };
+
     }
 
     public void startAnimation() {
-        //songAnimation.setFromX(songCanvas.getWidth() / 2);
-        //songAnimation.setByX(songCanvas.getWidth());
-        int duration = (int) (calcTotalBeatCountFromSong() / (double) player.getTimeCode().getTempo() * 60 * 1000);
-        songAnimation.setDuration(Duration.millis(duration)); //TODO: calc correct playback speed
-        int xCoordinates = (int) ((calcTotalBeatCountFromSong() - 1) * zoomFactor * 20);
-        songAnimation.setFromX(0);
-        songAnimation.setByX(-xCoordinates - 50); // a little bit behind last beat
-        songAnimation.play();
+        songGridAnimation.start();
     }
 
-    public void startAnimation(BeatStamp songPosition) {
-
-    }
-
-    public void stopCanvasAnimation() {
-
+    public void stopAnimation() {
+        songGridAnimation.stop();
     }
 
 
     private void drawStaticOverlay() {
         int midLinePositionX = (int) (rootPane.getWidth() / 2);
-        Line line = new Line(midLinePositionX, 0, midLinePositionX, 200);
-        line.setStroke(Color.RED);
-        line.setStrokeWidth(2);
-        rootPane.getChildren().add(line);
+        positionIndicator = new Line(midLinePositionX, 0, midLinePositionX, 200);
+        positionIndicator.setStroke(Color.RED);
+        positionIndicator.setStrokeWidth(2);
+        rootPane.getChildren().add(positionIndicator);
     }
 
     private void drawSongGrid() {
-        int xStartOffset = (int) rootPane.getWidth() / 2;
+        final int xStartOffset = (int) rootPane.getWidth() / 2;
 
-        for (int beat = 0; beat < calcTotalBeatCountFromSong(); beat++) {
+        for (int beat = 0; beat < player.getCurrentSong().calcTotalBeatCount(); beat++) {
             Line gridLine = new Line();
             if (beat % player.getCurrentSong().getBeatsPerBar() == 0) {
                 gridLine.setStroke(Color.WHITE);
@@ -108,34 +128,9 @@ public class SongPlayerController {
             gridLine.setEndX(xCoordinates + xStartOffset);
             gridLine.setEndY(200);
             songGrid.getChildren().add(gridLine);
-
-//            Line separationLineHor = new Line(xStartOffset, 25, (calcTotalBeatCountFromSong() - 1) * 20 + xStartOffset, 25);
-//            separationLineHor.setStroke(Color.LIGHTGRAY);
-//            separationLineHor.setStrokeWidth(0.004);
-//            songGrid.getChildren().add(separationLineHor);
         }
-
-
         rootPane.getChildren().add(songGrid);
     }
-
-    private void animate() {
-        AnimationTimer timer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                System.out.println(now);
-                System.out.println(System.currentTimeMillis());
-                System.out.println("");
-            }
-        };
-        timer.start();
-    }
-
-    private int calcTotalBeatCountFromSong() {
-        Song song = player.getCurrentSong();
-        return (song.getLastBeat().getBarNr() - 1) * song.getBeatsPerBar() + song.getLastBeat().getBeatNr();
-    }
-
 
     public static SongPlayerController getSongPlayerController() {
         return songPlayerController;

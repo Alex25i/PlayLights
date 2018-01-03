@@ -9,6 +9,7 @@ import java.util.List;
 
 public class LiveTimeCode {
 
+
     private Long reverenceTime = null;
     private BeatStamp reverencePosition = null;
     private int tempo = -1; // timeCodeTempo in bpm
@@ -27,6 +28,12 @@ public class LiveTimeCode {
     }
 
 
+    /**
+     * start the {@link LiveTimeCode} instace at the given {@link BeatStamp}
+     *
+     * @param beatStamp the position of the {@link Song} the {@link LiveTimeCode} should start at.
+     *                  Pass "{@code new BeatStamp(1,1)}" to start at the beginning of th {@link Song}.
+     */
     public void start(BeatStamp beatStamp) {
         if (tempo < 0 && MidiOrganizer.verbose) {
             throw new IllegalStateException("The tempo is not set or incorrect ");
@@ -48,7 +55,7 @@ public class LiveTimeCode {
     }
 
     /**
-     * @return the position of the @{@link LiveTimeCode as a @{@link BeatStamp}
+     * @return the position of the {@link LiveTimeCode} as a {@link BeatStamp}
      */
     public BeatStamp calcCurrentBeat() {
         //TODO: Implement
@@ -109,10 +116,10 @@ public class LiveTimeCode {
     }
 
     /**
-     * calculates how long it takes to reach given @{@link BeatStamp}
+     * calculates how long it takes to reach given {@link BeatStamp}
      *
      * @param beatStamp point in the song the duration to reach is calculated
-     * @return the time it takes to reach the @{@link BeatStamp} in Milliseconds
+     * @return the time it takes to reach the {@link BeatStamp} in Milliseconds
      */
     private long calculateTimeToReach(BeatStamp beatStamp) {
         if (!isStarted()) {
@@ -137,6 +144,9 @@ public class LiveTimeCode {
         return deltaTime;
     }
 
+    /**
+     * @return the newest time at which the {@link LiveTimeCode} was synced the the band
+     */
     public Long getReverenceTime() {
         return reverenceTime;
     }
