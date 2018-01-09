@@ -1,6 +1,6 @@
 package Data;
 
-import Midi.MidiOrganizer;
+import Logic.PlayLights;
 import Midi.MixTrackController;
 
 import java.util.ArrayList;
@@ -32,31 +32,42 @@ public class Song {
         padActions = new HashMap<>(16);
         this.lastBeat = lastBeat;
         this.autoStartPad = autoStartPad;
+
+        //validate parameters
+        if (PlayLights.verbose && name.isEmpty() || interpret.isEmpty() || tempo < 20 || tempo > 300
+                || beatsPerBar == 0 || lastBeat == null) {
+            new IllegalArgumentException("Song initialised incorrectly! Here are the arguments: \n"
+                    + "name = [" + name + "], interpret = [" + interpret + "], tempo = [" + tempo
+                    + "], beatsPerBar = [" + beatsPerBar + "], lastBeat = ["
+                    + lastBeat + "], autoStartPad = [" + autoStartPad + "]").printStackTrace();
+        }
     }
 
     /**
      * calculates the time difference between two @{@link BeatStamp}s in beats
+     * <p>
+     * BE AWARE: the result is negative, if the first beat is after the second one
      *
-     * @param beatStamp1 first @{@link BeatStamp} for delta calculation
-     * @param beatStamp2 second @{@link BeatStamp} for delta calculation
+     * @param firstBeat  first @{@link BeatStamp} for distance calculation
+     * @param secondBeat second @{@link BeatStamp} for distance calculation
      * @return the amount of beats between the two given @{@link BeatStamp}s
      */
-    public int calcBeatDistance(BeatStamp beatStamp1, BeatStamp beatStamp2) {
-        if (beatStamp1 == null || beatStamp2 == null) {
-            if (MidiOrganizer.verbose) {
+    public int calcBeatDistance(BeatStamp firstBeat, BeatStamp secondBeat) {
+        if (firstBeat == null || secondBeat == null) {
+            if (PlayLights.verbose) {
                 new NullPointerException("Beat distance calculation on null object reverence").printStackTrace();
             }
-            return -1;
+            return 0;
         }
-        return Math.abs((beatStamp1.getBarNr() * beatsPerBar + beatStamp1.getBeatNr())
-                - (beatStamp2.getBarNr() * beatsPerBar + beatStamp2.getBeatNr()));
+        return (secondBeat.getBarNr() * beatsPerBar + secondBeat.getBeatNr())
+                - (firstBeat.getBarNr() * beatsPerBar + firstBeat.getBeatNr());
     }
 
     /**
      * @return sum of the beats of the song in total
      */
     public int calcTotalBeatCount() {
-        return calcBeatDistance(new BeatStamp(1, 1), getLastBeat());
+        return calcBeatDistance(BeatStamp.FIRST_BEAT, getLastBeat());
     }
 
     public void addUserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad, Runnable eventAction) {
@@ -64,7 +75,7 @@ public class Song {
     }
 
     public void addPadAction(MixTrackController.PAD pad, Runnable action) {
-        if (MidiOrganizer.verbose && padActions.containsKey(pad)) {
+        if (PlayLights.verbose && padActions.containsKey(pad)) {
             new IllegalStateException("There is already an action registered for the pad "
                     + pad.toString()).printStackTrace();
         }
@@ -73,13 +84,13 @@ public class Song {
 
     public UserEvent getClosestEventOfPad(MixTrackController.PAD pad, BeatStamp time) {
         if (time == null) {
-            if (MidiOrganizer.verbose) {
+            if (PlayLights.verbose) {
                 new NullPointerException("Can't calculate the closest Event to a null BeatStamp reverence").printStackTrace();
             }
             return null;
         }
         if (!padActions.containsKey(pad)) {
-            if (MidiOrganizer.verbose) {
+            if (PlayLights.verbose) {
                 new NullPointerException("No user events registered for given event").printStackTrace();
             }
             return null;
@@ -88,8 +99,8 @@ public class Song {
         UserEvent closestEventOfPad = null;
         int closesDistance = Integer.MAX_VALUE;
         for (UserEvent userEvent : padActions.get(pad).userEvents) {
-            if (calcBeatDistance(time, userEvent.eventTime) < closesDistance) {
-                closesDistance = calcBeatDistance(time, userEvent.eventTime);
+            if (Math.abs(calcBeatDistance(time, userEvent.eventTime)) < closesDistance) {
+                closesDistance = Math.abs(calcBeatDistance(time, userEvent.eventTime));
                 closestEventOfPad = userEvent;
             }
         }

@@ -1,15 +1,20 @@
 package Midi;
 
+import Logic.PlayLights;
+
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.ShortMessage;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static Midi.MixTrackController.PAD.*;
 
 public class MixTrackController {
 
     public enum PAD {PAD_0X0, PAD_1X0, PAD_2X0, PAD_3X0, PAD_4X0, PAD_5X0, PAD_6X0, PAD_7X0, PAD_0X1, PAD_1X1, PAD_2X1, PAD_3X1, PAD_4X1, PAD_5X1, PAD_6X1, PAD_7X1,}
 
     public enum BLINK_DURATION {BARS4, BARS2, BARS1}
+
+    private Map<Byte, Timer> blinkingLEDs;
 
     // ------ midi note (Message type 0x90) ------
 
@@ -199,6 +204,7 @@ public class MixTrackController {
     public static final byte PITCH_BEND_MID_B_LED_ADDRESS = 0x29;
 
     MixTrackController() {
+        blinkingLEDs = new HashMap<>();
     }
 
     public void blinkPad(PAD pad, BLINK_DURATION blinkDuration, int songTempo) {
@@ -206,18 +212,45 @@ public class MixTrackController {
 
     }
 
+    public void blinkLedStart(final byte LED_ADDRESS, int blinkPeriod) {
+        if (blinkingLEDs.containsKey(LED_ADDRESS)) {
+            // LED already blinking
+            return;
+        }
+        blinkingLEDs.put(LED_ADDRESS, new Timer("Blink of " + LED_ADDRESS));
+        // use boolean inside a List so that the list object van be final
+        TimerTask blink = new TimerTask() {
+            boolean on = false;
+
+            @Override
+            public void run() {
+                on = !on;
+                setLedIllumination(LED_ADDRESS, on);
+            }
+        };
+        blinkingLEDs.get(LED_ADDRESS).schedule(blink, 0, blinkPeriod / 2);
+    }
+
+    public void stopBlinkLed(final byte LED_ADDRESS) {
+        if (blinkingLEDs.containsKey(LED_ADDRESS)) {
+            // remove timer from map an cancel it task
+            blinkingLEDs.remove(LED_ADDRESS).cancel();
+        }
+    }
+
 
     /**
      * turns one specific led on or off
      *
-     * @param ledID the LED which to be turned on or off
-     * @param on    defines weather the LED should be on or off
+     * @param ledAddress the LED which to be turned on or off
+     * @param on         defines weather the LED should be on or off
      */
     //TODO: Refactor: Use @MidiOrganizer.createMidiMessage()
-    public void setLedIllumination(byte ledID, boolean on) {
-        byte[] midiMessage = new byte[3];
+    //TODO: Be robust against not connected device
+    public void setLedIllumination(byte ledAddress, boolean on) {
+        int[] midiMessage = new int[3];
         midiMessage[0] = MidiOrganizer.MESSAGE_TYPE_NODE;
-        midiMessage[1] = ledID;
+        midiMessage[1] = ledAddress;
         if (on) {
             midiMessage[2] = MidiOrganizer.VELOCITY_FULL;
         } else {
@@ -227,7 +260,7 @@ public class MixTrackController {
         ShortMessage testMessage = new ShortMessage();
         try {
             testMessage.setMessage(midiMessage[0], midiMessage[1], midiMessage[2]);
-            MidiOrganizer.getMidiOrganizer().getMixTrackDeviceConnector().getReceiver().send(testMessage, -1);
+            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackDeviceConnector().getReceiver().send(testMessage, -1);
         } catch (InvalidMidiDataException e) {
             e.printStackTrace();
         }
@@ -285,6 +318,68 @@ public class MixTrackController {
     }
 
     /**
+     * @param pad_address the address of the returning {@link PAD}
+     * @return the {@link PAD} from the given <code>pad_address</code> or null if the given address doesn't
+     * relate to any {@link PAD}
+     */
+    public PAD getPadFromAddress(byte pad_address) {
+        switch (pad_address) {
+            case PAD_0X0_ADDRESS:
+                return PAD_0X0;
+
+            case PAD_1X0_ADDRESS:
+                return PAD_1X0;
+
+            case PAD_2X0_ADDRESS:
+                return PAD_2X0;
+
+            case PAD_3X0_ADDRESS:
+                return PAD_3X0;
+
+            case PAD_4X0_ADDRESS:
+                return PAD_4X0;
+
+            case PAD_5X0_ADDRESS:
+                return PAD_5X0;
+
+            case PAD_6X0_ADDRESS:
+                return PAD_6X0;
+
+            case PAD_7X0_ADDRESS:
+                return PAD_7X0;
+
+            default:
+
+                if (PAD_0X1_ADDRESS.contains(pad_address)) {
+                    return PAD_0X1;
+                }
+                if (PAD_1X1_ADDRESS.contains(pad_address)) {
+                    return PAD_1X1;
+                }
+                if (PAD_2X1_ADDRESS.contains(pad_address)) {
+                    return PAD_2X1;
+                }
+                if (PAD_3X1_ADDRESS.contains(pad_address)) {
+                    return PAD_3X1;
+                }
+                if (PAD_4X1_ADDRESS.contains(pad_address)) {
+                    return PAD_4X1;
+                }
+                if (PAD_5X1_ADDRESS.contains(pad_address)) {
+                    return PAD_5X1;
+                }
+                if (PAD_6X1_ADDRESS.contains(pad_address)) {
+                    return PAD_6X1;
+                }
+                if (PAD_7X1_ADDRESS.contains(pad_address)) {
+                    return PAD_7X1;
+                }
+                // if the given address is not a pad address return null
+                return null;
+        }
+    }
+
+    /**
      * turns of all default illuminated LEDs of the controller
      */
     public void blackoutStartLEDs() {
@@ -301,7 +396,7 @@ public class MixTrackController {
 
     private Thread createBlinkRunnable(PAD pad, BLINK_DURATION blink_duration, int tempo) {
         return new Thread(() -> {
-            // TODO: implement Method
+            // TODO.contains(pad_address) { implement Method
             // TODO: HOW about interrupting the thread
         });
     }

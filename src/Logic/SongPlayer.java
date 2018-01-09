@@ -3,7 +3,6 @@ package Logic;
 import Data.BeatStamp;
 import Data.Song;
 import GUI.SongPlayerController;
-import Midi.MidiOrganizer;
 import Midi.MixTrackController;
 
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ public class SongPlayer {
                 }
             });
 
-            timeCode.start(new BeatStamp(1, 1));
+            timeCode.start(BeatStamp.FIRST_BEAT);
             SongPlayerController.getSongPlayerController().startAnimation();
         } else {
             new IllegalStateException("Can't prepare SongPlayerController: It is not instanced yet. " +
@@ -53,20 +52,39 @@ public class SongPlayer {
         }
         Song.PadAction padAction = currentSong.getPadActions().get(pad);
 
-        if (pad == currentSong.getAutoStartPad() && !timeCode.isStarted()) {
+        if (pad == currentSong.getAutoStartPad() && !timeCode.isRunning()) {
+            // pad triggers autoStart of the song
+
             // create new list with same elements as the user events from the PadAction
             ArrayList<Song.UserEvent> padUserEvents = new ArrayList<>(padAction.getUserEvents());
             padUserEvents.sort(null);
             if (!padUserEvents.isEmpty()) {
                 // set the event time of the first event of the starting pad action as the starting time of the time code
                 timeCode.start(padUserEvents.get(0).getEventTime());
-            } else if (MidiOrganizer.verbose) {
+            } else if (PlayLights.verbose) {
                 new IllegalStateException("There are no events int the event list of the starting pad").printStackTrace();
             }
         }
 
-        timeCode.syncNow(currentSong.getClosestEventOfPad(pad, timeCode.calcCurrentBeat()).getEventTime());
+        //TODO: Maybe implement some security checks before syncing the timeCode
+        timeCode.syncNow(currentSong.getClosestEventOfPad(pad, timeCode.calcCurrentBeatPos()).getEventTime());
         padAction.getAction().run();
+    }
+
+    public void playPausePressed() {
+        if (!timeCode.isRunning()) {
+            if (timeCode.atFirstBeat()) {
+                timeCode.start(BeatStamp.FIRST_BEAT);
+            } else {
+                timeCode.start(timeCode.calcCurrentBeatPos());
+            }
+            SongPlayerController.getSongPlayerController().startAnimation();
+            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.PLAY_A_LED_ADDRESS);
+            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.PLAY_A_LED_ADDRESS, true);
+        } else {
+            timeCode.stop();
+            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().blinkLedStart(MixTrackController.PLAY_A_LED_ADDRESS, 1000);
+        }
     }
 
     public Song getCurrentSong() {

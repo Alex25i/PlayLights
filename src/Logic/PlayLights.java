@@ -1,6 +1,7 @@
 package Logic;
 
 import Data.Library;
+import Midi.MidiOrganizer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -9,14 +10,20 @@ import javafx.stage.Stage;
 import java.net.URL;
 
 public class PlayLights extends Application {
+    public static boolean verbose = false;
     private static PlayLights playLights;
 
     private Stage primaryStage;
     private Library library;
+    private SongPlayer songPlayer;
+    private MidiOrganizer midiOrganizer;
 
     public PlayLights() {
+        verbose = true;
         playLights = this;
         library = new Library();
+        midiOrganizer = new MidiOrganizer();
+        midiOrganizer.getMixTrackController().blackoutStartLEDs();
     }
 
     /**
@@ -50,7 +57,7 @@ public class PlayLights extends Application {
 
         // TODO: Move this to an appropriate location
 
-        SongPlayer songPlayer = new SongPlayer(PlayLights.getPlayLights().getLibrary().getSongList().get(0));
+        songPlayer = new SongPlayer(PlayLights.getPlayLights().getLibrary().getSongList().get(0));
     }
 
     public Stage getPrimaryStage() {
@@ -65,8 +72,15 @@ public class PlayLights extends Application {
         return library;
     }
 
+    public SongPlayer getSongPlayer() {
+        return songPlayer;
+    }
+
+    public MidiOrganizer getMidiOrganizer() {
+        return midiOrganizer;
+    }
+
     public static void main(String[] args) {
-        new PlayLights();
         launch(args);
     }
 }

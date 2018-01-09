@@ -1,5 +1,7 @@
 package Midi;
 
+import Logic.PlayLights;
+
 import javax.sound.midi.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,7 @@ public class MidiDeviceConnector {
         for (MidiDevice.Info info : infos) {
             try {
                 device = MidiSystem.getMidiDevice(info);
-                if (MidiOrganizer.verbose) {
+                if (PlayLights.verbose) {
                     System.out.println("Available device: " + device.getDeviceInfo().getName());
                 }
             } catch (MidiUnavailableException e) {
@@ -52,12 +54,12 @@ public class MidiDeviceConnector {
             }
         }
 
-        if (found && MidiOrganizer.verbose) {
+        if (found && PlayLights.verbose) {
             System.out.println("Connection with " + deviceName + " established.");
         }
 
         if (!found) {
-            if (MidiOrganizer.verbose) {
+            if (PlayLights.verbose) {
                 new IllegalStateException("ERROR: No Device which contains " + devNamePart + " in its name found!").printStackTrace();
             }
             return;
@@ -92,7 +94,7 @@ public class MidiDeviceConnector {
             @Override
             public void send(MidiMessage message, long timeStamp) {
                 if (open) {
-                    MidiOrganizer.getMidiOrganizer().processMixTrackMessage(message, timeStamp, deviceName);
+                    PlayLights.getPlayLights().getMidiOrganizer().processMidiMessage(message, timeStamp, deviceName);
                 }
             }
 

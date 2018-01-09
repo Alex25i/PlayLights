@@ -57,9 +57,23 @@ public class SongPlayerController {
             public void handle(long now) {
                 final long currentTime = System.currentTimeMillis();
 
-                if (player.getTimeCode() == null || !player.getTimeCode().isStarted()) {
-                    new IllegalStateException("Can't play the song animation." +
-                            "Start a corresponding timeCode instance first!").printStackTrace();
+                if (player.getTimeCode() == null || !player.getTimeCode().isRunning()) {
+                    if (player.getTimeCode().atFirstBeat()) {
+                        new IllegalStateException("Can't play the song animation." +
+                                "Start a corresponding timeCode instance first!").printStackTrace();
+                    } else {
+                        // only snap the animation to last beat if the song has not finished yet
+                        if (!player.getTimeCode().hasFinished()) {
+                            //snap the animation to nearest beat
+                            BeatStamp currentBeat = player.getTimeCode().calcCurrentBeatPos();
+                            final int currentBeatSum = player.getCurrentSong().calcBeatDistance(BeatStamp.FIRST_BEAT, currentBeat);
+                            final int currentPxPos = (int) -(currentBeatSum * zoomFactor * 20);
+                            if (currentPxPos != songGrid.getLayoutX()) {
+                                songGrid.setLayoutX(currentPxPos);
+                            }
+                        }
+
+                    }
                     stopAnimation();
                     return;
                 }
@@ -67,29 +81,40 @@ public class SongPlayerController {
                 // time passed in milliseconds since the last time code sync was triggered
                 final long timeSinceLastSync = currentTime - player.getTimeCode().getReverenceTime();
                 // validate result
-                if (timeSinceLastSync <= 0) {
-                    new IllegalStateException("TimeCode Sync is in the future. " +
-                            "Check your implementation why this seems to be the case!").printStackTrace();
+                if (timeSinceLastSync < 0 || timeSinceLastSync > 3600000) {
+                    new IllegalStateException("timeSinceLastSync is not in a valid range: timeSinceLastSync = " + timeSinceLastSync
+                            + "Check your implementation why this seems to be the case!").printStackTrace();
+                    stopAnimation();
+                    return;
                 }
+                final double millsPerBeat = (int) (1000 / ((double) player.getTimeCode().getTempo() / 60));
 
                 // time the song plays with the current tempo until the synced BeatStamp at the timeCode is reached.
-                final long timeToSyncedBeat = player.getCurrentSong().calcBeatDistance(
-                        new BeatStamp(1, 1), player.getTimeCode().getReverencePosition());
+                final long timeToSyncedBeat = (long) (player.getCurrentSong().calcBeatDistance(
+                        BeatStamp.FIRST_BEAT, player.getTimeCode().getReverencePosition()) * millsPerBeat);
 
                 // time passed in milliseconds since the current song started, if the speed were always ath the current rate
                 final long theoreticalTimeSinceBeginning = timeToSyncedBeat + timeSinceLastSync;
 
-                final double millsPerBeat = (int) (1000 / ((double) player.getTimeCode().getTempo() / 60));
-                int animationPosition = (int) (-theoreticalTimeSinceBeginning / (double) millsPerBeat * zoomFactor * 20);
+
+                int animationPosition = (int) (-theoreticalTimeSinceBeginning / millsPerBeat * zoomFactor * 20);
 
                 if (animationPosition != songGrid.getLayoutX()) {
                     songGrid.setLayoutX(animationPosition);
-                }
-                // run the given code(songEnd) shortly after the song is finished
 
+                }
+                //System.out.println("animationPosition = " + animationPosition);
+                // run the given code(songEnd) shortly after the song is finished
                 if (songGrid.getLayoutX() <= songEndPos) {
                     //song ended
                     songEnd.run();
+                }
+
+                if (!player.getTimeCode().isRunning() && !player.getTimeCode().atFirstBeat()) {
+                    //timeCode currently waiting at the first beat of the song
+                    stopAnimation();
+                    // do this after the animation positioning, so that the animation get stopped at the beginning
+                    // of the beat
                 }
             }
         };
@@ -154,7 +179,7 @@ public class SongPlayerController {
         final List<Song.UserEvent> userEvents = player.getCurrentSong().getUserEvents();
         for (Song.UserEvent userEvent : userEvents) {
             final BeatStamp beatPos = userEvent.getEventTime();
-            final int pxPos = (int) (player.getCurrentSong().calcBeatDistance(new BeatStamp(1, 1), beatPos)
+            final int pxPos = (int) (player.getCurrentSong().calcBeatDistance(BeatStamp.FIRST_BEAT, beatPos)
                     * zoomFactor * 20) + xStartOffset;
 
             //line
@@ -198,7 +223,6 @@ public class SongPlayerController {
             markerLetter.setFill(Color.WHITE);
             markerLetter.setStrokeType(StrokeType.INSIDE);
             songGrid.getChildren().add(markerLetter);
-
 
 
         }
