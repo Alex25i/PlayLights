@@ -10,7 +10,7 @@ public class LiveTimeCode {
 
 
     private long reverenceTime = 0;
-    private BeatStamp reverencePosition = null;
+    private BeatStamp reverencePosition = BeatStamp.FIRST_BEAT;
     private int tempo = -1; // timeCodeTempo in bpm
 
     private Song currentSong;

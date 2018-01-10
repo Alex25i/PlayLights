@@ -42,10 +42,8 @@ public class MidiOrganizer {
                 if (midiType == MESSAGE_TYPE_NODE && pressedPad != null && midiVelocity == VELOCITY_FULL) {
                     // the midi message was caused by pressing the pad pressedPad
                     PlayLights.getPlayLights().getSongPlayer().padPressed(pressedPad);
-                } else if (midiType == MESSAGE_TYPE_NODE && midiNode == MixTrackController.PLAY_A_ADDRESS && midiVelocity == VELOCITY_FULL) {
+                } else if (midiType == MESSAGE_TYPE_NODE && midiNode == MixTrackController.PLAY_B_ADDRESS && midiVelocity == VELOCITY_FULL) {
                     PlayLights.getPlayLights().getSongPlayer().playPausePressed();
-                } else if (midiType == MESSAGE_TYPE_NODE && midiNode == MixTrackController.SYNC_A_ADDRESS && midiVelocity == VELOCITY_FULL) {
-                    PlayLights.getPlayLights().getSongPlayer().getTimeCode().stop();
                 }
 
             } else {
@@ -57,26 +55,24 @@ public class MidiOrganizer {
         }
     }
 
-    public MidiMessage createMidiMessage(int messageType, int note, int velocity) {
-        ShortMessage testMessage = new ShortMessage();
+    public void sendMidiMessage(int messageType, int note, int velocity, MidiDeviceConnector deviceConnector) {
+        ShortMessage message = new ShortMessage();
         try {
-            testMessage.setMessage(messageType & 0xFF, note & 0xFF, velocity);
+            message.setMessage(messageType & 0xFF, note & 0xFF, velocity);
         } catch (InvalidMidiDataException e) {
             e.printStackTrace();
         }
-
-        return testMessage;
+        deviceConnector.getReceiver().send(message, -1);
     }
 
-    public MidiMessage createMidiMessage(int messageType, int channel, int note, int velocity) {
+    public void sendMidiMessage(int messageType, int channel, int note, int velocity, MidiDeviceConnector deviceConnector) {
         ShortMessage message = new ShortMessage();
         try {
             message.setMessage(messageType & 0xff, channel & 0xff, note & 0xFF, velocity & 0xFF);
         } catch (InvalidMidiDataException e) {
             e.printStackTrace();
         }
-
-        return message;
+        deviceConnector.getReceiver().send(message, -1);
     }
 
     public MidiDeviceConnector getMixTrackDeviceConnector() {
@@ -87,8 +83,7 @@ public class MidiOrganizer {
         return mixTrackController;
     }
 
-    public static void main(String[] args) {
-        PlayLights.verbose = true;
-        new MidiOrganizer();
+    public MidiDeviceConnector getMpcDeviceConnector() {
+        return mpcDeviceConnector;
     }
 }

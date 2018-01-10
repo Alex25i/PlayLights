@@ -1,9 +1,8 @@
 package Midi;
 
+import Data.Song;
 import Logic.PlayLights;
 
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.ShortMessage;
 import java.util.*;
 
 import static Midi.MixTrackController.PAD.*;
@@ -207,12 +206,22 @@ public class MixTrackController {
         blinkingLEDs = new HashMap<>();
     }
 
+    public void prepareSong(Song currentSong) {
+        for (Song.PadAction padAction : currentSong.getPadActions().values()) {
+            List<Byte> padLEDAddresses = getPadLedAddresses(padAction.getTriggerPad());
+            for (Byte padAddress : padLEDAddresses) {
+                setLedIllumination(padAddress, true);
+            }
+        }
+        StartBlinkLed(PLAY_B_LED_ADDRESS, 1500);
+    }
+
     public void blinkPad(PAD pad, BLINK_DURATION blinkDuration, int songTempo) {
         // TODO: Implement method
 
     }
 
-    public void blinkLedStart(final byte LED_ADDRESS, int blinkPeriod) {
+    public void StartBlinkLed(final byte LED_ADDRESS, int blinkPeriod) {
         if (blinkingLEDs.containsKey(LED_ADDRESS)) {
             // LED already blinking
             return;
@@ -256,18 +265,8 @@ public class MixTrackController {
         } else {
             midiMessage[2] = MidiOrganizer.VELOCITY_NONE;
         }
-
-        ShortMessage testMessage = new ShortMessage();
-        try {
-            testMessage.setMessage(midiMessage[0], midiMessage[1], midiMessage[2]);
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackDeviceConnector().getReceiver().send(testMessage, -1);
-        } catch (InvalidMidiDataException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void setIllumination(PAD pad, boolean on) {
-
+        PlayLights.getPlayLights().getMidiOrganizer().sendMidiMessage(midiMessage[0], midiMessage[1], midiMessage[2],
+                PlayLights.getPlayLights().getMidiOrganizer().getMixTrackDeviceConnector());
     }
 
     private List<Byte> getPadLedAddresses(PAD pad) {
@@ -387,11 +386,17 @@ public class MixTrackController {
         setLedIllumination(CUE_A_LED_ADDRESS, false);
         setLedIllumination(PLAY_A_LED_ADDRESS, false);
         setLedIllumination(STUTTER_A_LED_ADDRESS, false);
-
         setLedIllumination(SYNC_B_LED_ADDRESS, false);
         setLedIllumination(CUE_B_LED_ADDRESS, false);
         setLedIllumination(PLAY_B_LED_ADDRESS, false);
         setLedIllumination(STUTTER_B_LED_ADDRESS, false);
+
+        setLedIllumination(LOOP_MODE_A_LED, false);
+        setLedIllumination(SAMPLE_MODE_A_LED, false);
+        setLedIllumination(CUE_MODE_A_LED, false);
+        setLedIllumination(LOOP_MODE_B_LED, false);
+        setLedIllumination(SAMPLE_MODE_B_LED, false);
+        setLedIllumination(CUE_MODE_B_LED, false);
     }
 
     private Thread createBlinkRunnable(PAD pad, BLINK_DURATION blink_duration, int tempo) {

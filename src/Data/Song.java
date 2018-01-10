@@ -70,16 +70,20 @@ public class Song {
         return calcBeatDistance(BeatStamp.FIRST_BEAT, getLastBeat());
     }
 
-    public void addUserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad, Runnable eventAction) {
-        userEvents.add(new UserEvent(name, eventTime, triggerPad, eventAction));
+    public UserEvent addUserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad, Runnable eventAction) {
+        UserEvent userEvent = new UserEvent(name, eventTime, triggerPad, eventAction);
+        userEvents.add(userEvent);
+        return userEvent;
     }
 
-    public void addPadAction(MixTrackController.PAD pad, Runnable action) {
+    public PadAction addPadAction(MixTrackController.PAD pad, Runnable action) {
         if (PlayLights.verbose && padActions.containsKey(pad)) {
             new IllegalStateException("There is already an action registered for the pad "
                     + pad.toString()).printStackTrace();
         }
-        padActions.put(pad, new PadAction(pad, action));
+        PadAction padAction = new PadAction(pad, action);
+        padActions.put(pad, padAction);
+        return padAction;
     }
 
     public UserEvent getClosestEventOfPad(MixTrackController.PAD pad, BeatStamp time) {
@@ -244,8 +248,14 @@ public class Song {
             return triggerPad;
         }
 
-        public ArrayList<UserEvent> getUserEvents() {
+        public List<UserEvent> getUserEvents() {
             return userEvents;
+        }
+
+        public void addUserEvent(UserEvent userEvent) {
+            if (!userEvents.contains(userEvent)) {
+                userEvents.add(userEvent);
+            }
         }
 
         public Runnable getAction() {
