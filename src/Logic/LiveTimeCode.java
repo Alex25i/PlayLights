@@ -206,4 +206,13 @@ public class LiveTimeCode {
         this.tempo = tempo;
     }
 
+    /**
+     * resets the time code to the beginning of the song
+     */
+    public void reset() {
+        if (isRunning()) stop();
+        reverencePosition = BeatStamp.FIRST_BEAT;
+    }
+
+
 }

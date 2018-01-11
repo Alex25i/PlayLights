@@ -2,6 +2,9 @@ package Midi;
 
 import Data.Song;
 import Logic.PlayLights;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 import java.util.*;
 
@@ -214,6 +217,39 @@ public class MixTrackController {
             }
         }
         StartBlinkLed(PLAY_B_LED_ADDRESS, 1500);
+    }
+
+    public void reconnectRoutine() {
+        Platform.runLater(() -> {
+            new MissingResourceException("The connection to the Mixtrack controller is lost!",
+                    MidiDeviceConnector.class.toString(), "-1").printStackTrace();
+//            Alert alert = new Alert(Alert.AlertType.ERROR);
+//            alert.setTitle("Error: Connection Lost");
+//            alert.setHeaderText("Device unplugged!");
+//            alert.setContentText("The connection to the Mixtrack controller is lost!\n" +
+//                    "Please check the connection and click reconnect");
+//            ButtonType buttonTypeReconnect = new ButtonType("Reconnect");
+//            alert.getButtonTypes().setAll(buttonTypeReconnect);
+//            alert.showAndWait();
+//            PlayLights.getPlayLights().getMidiOrganizer().setMixTrackDeviceConnector(new MidiDeviceConnector("Mixtrack"));
+//            // reconnected now, otherwise application was closed in MidiDeviceConnector.searchForDevice(String)
+//            blackoutStartLEDs();
+//            //TODO: Illuminate right LEDs
+//            if (PlayLights.getPlayLights().getSongPlayer() != null) {
+//                // there is a song active
+//                prepareSong(PlayLights.getPlayLights().getSongPlayer().getCurrentSong());
+//                //SongPlayerController.getSongPlayerController().setBlackBackgroundColor();
+//            }
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error: Connection Lost");
+            alert.setHeaderText("Device unplugged!");
+            alert.setContentText("The connection to the Mixtrack controller is lost!\n" +
+                    "Please check the connection and restart the application");
+            ButtonType buttonTypeReconnect = new ButtonType("Exit");
+            alert.getButtonTypes().setAll(buttonTypeReconnect);
+            alert.showAndWait();
+            System.exit(2);
+        });
     }
 
     public void blinkPad(PAD pad, BLINK_DURATION blinkDuration, int songTempo) {

@@ -1,6 +1,7 @@
 package Midi;
 
 import Logic.PlayLights;
+import javafx.scene.control.Alert;
 
 import javax.sound.midi.*;
 import java.util.ArrayList;
@@ -16,8 +17,26 @@ public class MidiDeviceConnector {
     private String deviceName = "";
 
     public MidiDeviceConnector(String devNamePart) {
+        searchForDevice(devNamePart);
 
+        MidiDevice md = getMidiDevice();
+        Receiver mdR = null;
+        Transmitter mdT = null;
+        try {
+            mdR = md.getReceiver();
+        } catch (MidiUnavailableException e) {
+            // do nothing
+        }
+        try {
+            mdT = md.getTransmitter();
+        } catch (MidiUnavailableException e) {
+            e.printStackTrace();
+        }
+        transmitter.setReceiver(mdR);
+        mdT.setReceiver(receiver);
+    }
 
+    private void searchForDevice(String devNamePart) {
         // Obtain information about all the installed devices.
         MidiDevice device = null;
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
@@ -62,27 +81,18 @@ public class MidiDeviceConnector {
             if (PlayLights.verbose) {
                 new IllegalStateException("ERROR: No Device which contains " + devNamePart + " in its name found!").printStackTrace();
             }
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Device not found");
+            alert.setContentText("The " + devNamePart + " midi device was not found!\n" +
+                    "Connect the device and restart the application");
+            alert.showAndWait();
+            System.exit(2);
             return;
         }
-
-        MidiDevice md = getMidiDevice();
-        Receiver mdR = null;
-        Transmitter mdT = null;
-        try {
-            mdR = md.getReceiver();
-        } catch (MidiUnavailableException e) {
-            // do nothing
-        }
-        try {
-            mdT = md.getTransmitter();
-        } catch (MidiUnavailableException e) {
-            e.printStackTrace();
-        }
-        transmitter.setReceiver(mdR);
-        mdT.setReceiver(receiver);
     }
 
-    private  Receiver getMidiReceiver(MidiDevice ownerOfReceiver) {
+    private Receiver getMidiReceiver(MidiDevice ownerOfReceiver) {
         return new MidiDeviceReceiver() {
             private boolean open = true;
 
@@ -105,7 +115,7 @@ public class MidiDeviceConnector {
         };
     }
 
-    private  MidiDeviceTransmitter getTransMidiTransmitter(MidiDevice ownerOfTransmitter) {
+    private MidiDeviceTransmitter getTransMidiTransmitter(MidiDevice ownerOfTransmitter) {
         return new MidiDeviceTransmitter() {
             private Receiver receiver;
 
@@ -131,7 +141,7 @@ public class MidiDeviceConnector {
         };
     }
 
-    private  MidiDevice getMidiDevice() {
+    private MidiDevice getMidiDevice() {
         return new MidiDevice() {
             boolean isOpen = false;
             long openTime = System.currentTimeMillis();

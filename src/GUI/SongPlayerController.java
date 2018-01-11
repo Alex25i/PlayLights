@@ -26,7 +26,7 @@ public class SongPlayerController {
     private AnimationTimer songGridAnimation;
 
     @FXML
-    Pane rootPane;
+    private Pane rootPane;
 
     private Group songGrid;
     private Line positionIndicator;
@@ -223,9 +223,19 @@ public class SongPlayerController {
             markerLetter.setFill(Color.WHITE);
             markerLetter.setStrokeType(StrokeType.INSIDE);
             songGrid.getChildren().add(markerLetter);
-
-
         }
+    }
+
+    /**
+     * resets the animation position to the first beat of the song
+     */
+    public void resetAnimationPosition() {
+        stopAnimation();
+        songGrid.setLayoutX(0);
+    }
+
+    public void setBlackBackgroundColor() {
+
     }
 
     public static SongPlayerController getSongPlayerController() {

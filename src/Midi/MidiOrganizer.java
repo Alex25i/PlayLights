@@ -15,21 +15,37 @@ public class MidiOrganizer {
     private MidiDeviceConnector mixTrackDeviceConnector;
     private MixTrackController mixTrackController;
     private MidiDeviceConnector mpcDeviceConnector;
+    private boolean connectionLost;
 
     public MidiOrganizer() {
         mixTrackDeviceConnector = new MidiDeviceConnector("Mixtrack");
         mixTrackController = new MixTrackController();
         mpcDeviceConnector = new MidiDeviceConnector("LoopBe");
+        connectionLost = false;
     }
 
     public void processMidiMessage(MidiMessage message, long timeStamp, String sourceName) {
         byte[] midiMessage = message.getMessage();
+
+        if (midiMessage.length < 3) {
+            int errorType = (int) (midiMessage[0] & 0xFF);
+            if (errorType == 247) {
+                // device disconnected
+                if (!connectionLost) {
+                    connectionLost = true;
+
+                    mixTrackController.reconnectRoutine();
+                }
+                return;
+            }
+        }
         int midiType = (int) (midiMessage[0] & 0xFF);
         int midiNode = (int) (midiMessage[1] & 0xFF);
         int midiVelocity = (int) (midiMessage[2] & 0xFF);
 
         if (PlayLights.verbose) {
-            System.out.println("Midi message received from " + sourceName + ": " + Integer.toHexString(midiType) + " " + Integer.toHexString(midiNode) + " " + Integer.toHexString(midiVelocity));
+            System.out.println("Midi message received from " + sourceName + ": " + Integer.toHexString(midiType) + " "
+                    + Integer.toHexString(midiNode) + " " + Integer.toHexString(midiVelocity));
         }
 
         if (sourceName.toLowerCase().contains("Mixtrack".toLowerCase())) {
@@ -44,6 +60,8 @@ public class MidiOrganizer {
                     PlayLights.getPlayLights().getSongPlayer().padPressed(pressedPad);
                 } else if (midiType == MESSAGE_TYPE_NODE && midiNode == MixTrackController.PLAY_B_ADDRESS && midiVelocity == VELOCITY_FULL) {
                     PlayLights.getPlayLights().getSongPlayer().playPausePressed();
+                } else if (midiType == MESSAGE_TYPE_NODE && midiNode == MixTrackController.CUE_B_LED_ADDRESS && midiVelocity == VELOCITY_FULL) {
+                    PlayLights.getPlayLights().getSongPlayer().resetPressed();
                 }
 
             } else {
@@ -77,6 +95,10 @@ public class MidiOrganizer {
 
     public MidiDeviceConnector getMixTrackDeviceConnector() {
         return mixTrackDeviceConnector;
+    }
+
+    public void setMixTrackDeviceConnector(MidiDeviceConnector mixTrackDeviceConnector) {
+        this.mixTrackDeviceConnector = mixTrackDeviceConnector;
     }
 
     public MixTrackController getMixTrackController() {

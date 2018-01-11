@@ -21,13 +21,7 @@ public class SongPlayer {
         // TODO: This not the final implementation
         if (SongPlayerController.getSongPlayerController() != null) {
 
-            SongPlayerController.getSongPlayerController().prepare(this, new Runnable() {
-                @Override
-                public void run() {
-                    SongPlayerController.getSongPlayerController().stopAnimation();
-                    //TODO: Inform User that song has ended
-                }
-            });
+            SongPlayerController.getSongPlayerController().prepare(this, createSongEndRunnable());
         } else {
             new IllegalStateException("Can't prepare SongPlayerController: It is not instanced yet. " +
                     "Check your implementation! Is the the controller class set in the fxml file?").printStackTrace();
@@ -87,10 +81,33 @@ public class SongPlayer {
             SongPlayerController.getSongPlayerController().startAnimation();
             PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS);
             PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.PLAY_B_LED_ADDRESS, true);
+            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, false);
         } else {
             timeCode.stop();
             PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().StartBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS, 1000);
+            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, true);
         }
+    }
+
+    public void resetPressed() {
+        if ((!timeCode.isRunning() && !timeCode.atFirstBeat()) || (timeCode.isRunning()
+                && currentSong.calcBeatDistance(currentSong.getLastBeat(), timeCode.calcCurrentBeatPos()) >= 0)) {
+
+            //song is stopped not at the beginning of the song or the song is running after the last beat of the song
+            timeCode.reset();
+            SongPlayerController.getSongPlayerController().resetAnimationPosition();
+            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.CUE_B_LED_ADDRESS);
+            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, false);
+            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().StartBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS, 1500);
+        }
+    }
+
+    public Runnable createSongEndRunnable() {
+        return () -> {
+            SongPlayerController.getSongPlayerController().stopAnimation();
+            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().StartBlinkLed(MixTrackController.CUE_B_LED_ADDRESS, 1500);
+            //TODO: Inform User that song has ended
+        };
     }
 
     public Song getCurrentSong() {
