@@ -54,7 +54,7 @@ public class MidiOrganizer {
             if (PlayLights.getPlayLights().getSongPlayer() != null) {
                 // there is a song loaded or playing currently
                 // check if a MixTrackController.PAD was pressed
-                MixTrackController.PAD pressedPad = mixTrackController.getPadFromAddress((byte) midiNode);
+                MixTrackController.PAD pressedPad = MixTrackController.getPadFromAddress((byte) midiNode);
                 if (midiType == MESSAGE_TYPE_NODE && pressedPad != null && midiVelocity == VELOCITY_FULL) {
                     // the midi message was caused by pressing the pad pressedPad
                     PlayLights.getPlayLights().getSongPlayer().padPressed(pressedPad);

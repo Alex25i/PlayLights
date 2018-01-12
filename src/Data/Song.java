@@ -3,10 +3,7 @@ package Data;
 import Logic.PlayLights;
 import Midi.MixTrackController;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Song {
 
@@ -17,7 +14,7 @@ public class Song {
 
     private BeatStamp lastBeat;
     private List<UserEvent> userEvents;
-    private Map<MixTrackController.PAD, PadAction> padActions;
+    private Map<MixTrackController.PAD, PadAction[]> padActions;
     // pad at which the player will automatically trigger the beginning of the song (if it is loaded)
     // Can be null, if this feature is not desired for the song (manual start required)
     private MixTrackController.PAD autoStartPad;
@@ -76,39 +73,77 @@ public class Song {
         return userEvent;
     }
 
-    public PadAction addPadAction(MixTrackController.PAD pad, Runnable action) {
-        if (PlayLights.verbose && padActions.containsKey(pad)) {
+    public PadAction addPadAction(MixTrackController.PAD pad, int bank, Runnable action) {
+        if (PlayLights.verbose && padActions.get(pad) != null && padActions.get(pad)[bank] != null) {
             new IllegalStateException("There is already an action registered for the pad "
-                    + pad.toString()).printStackTrace();
+                    + pad.toString() + "at the bank " + bank + ".").printStackTrace();
         }
-        PadAction padAction = new PadAction(pad, action);
-        padActions.put(pad, padAction);
+        PadAction[] padActionsList = padActions.get(pad);
+
+        //if no actions are assigned to this pad yet, create a new list to hold assignments
+        if (padActionsList == null) {
+            if (MixTrackController.padIsBankRoot(pad)) {
+                padActionsList = new PadAction[1];
+            } else {
+                padActionsList = new PadAction[6];
+            }
+        }
+        if (padActionsList.length < bank + 1 && PlayLights.verbose) {
+            new IllegalArgumentException("bank " + bank + " is not available for pad " + pad.toString()).printStackTrace();
+            // don't return so the error gets thrown here. There will be one thrown anyway.
+        }
+        PadAction padAction = new PadAction(pad, bank, action);
+        padActionsList[bank] = padAction;
+        padActions.put(pad, padActionsList);
         return padAction;
     }
 
-    public UserEvent getClosestEventOfPad(MixTrackController.PAD pad, BeatStamp time) {
+    public UserEvent getClosestEventOfPadAction(PadAction padAction, BeatStamp time) {
         if (time == null) {
             if (PlayLights.verbose) {
                 new NullPointerException("Can't calculate the closest Event to a null BeatStamp reverence").printStackTrace();
             }
-            return null;
         }
-        if (!padActions.containsKey(pad)) {
+
+        if (padAction == null) {
             if (PlayLights.verbose) {
-                new NullPointerException("No user events registered for given event").printStackTrace();
+                new NullPointerException("Can't calculate the closest Event to a null padAction reverence").printStackTrace();
             }
-            return null;
+        }
+
+        if (padAction.getUserEvents().isEmpty()) {
+            if (PlayLights.verbose) {
+                new NullPointerException("No user events registered for given padAction: "
+                        + "Pad=" + padAction.getTriggerPad() + " Bank=" + padAction.getBank()).printStackTrace();
+            }
         }
 
         UserEvent closestEventOfPad = null;
         int closesDistance = Integer.MAX_VALUE;
-        for (UserEvent userEvent : padActions.get(pad).userEvents) {
+        for (UserEvent userEvent : padActions.get(padAction.getTriggerPad())[padAction.getBank()].getUserEvents()) {
             if (Math.abs(calcBeatDistance(time, userEvent.eventTime)) < closesDistance) {
                 closesDistance = Math.abs(calcBeatDistance(time, userEvent.eventTime));
                 closestEventOfPad = userEvent;
             }
         }
         return closestEventOfPad;
+    }
+
+    public List<Song.PadAction> getPadActionsFromBank(int bank) {
+        List<Song.PadAction> padActionList = new ArrayList<>();
+        Collection<PadAction[]> padActions = this.padActions.values();
+        for (PadAction[] padActionArray : padActions) {
+            if (padActionArray[0] != null) {
+                if (MixTrackController.padIsBankRoot(padActionArray[0].getTriggerPad())) {
+                    // triggered pad is root and not empty
+                    padActionList.add(padActionArray[0]);
+                } else if (padActionArray[bank] != null) {
+                    // triggered pad is not root and not empty
+                    padActionList.add(padActionArray[bank]);
+                }
+            }
+        }
+        return padActionList;
     }
 
     public String getName() {
@@ -135,7 +170,7 @@ public class Song {
         return userEvents;
     }
 
-    public Map<MixTrackController.PAD, PadAction> getPadActions() {
+    public Map<MixTrackController.PAD, PadAction[]> getPadActions() {
         return padActions;
     }
 
@@ -233,9 +268,11 @@ public class Song {
         private MixTrackController.PAD triggerPad;
         private ArrayList<UserEvent> userEvents;
         private Runnable action;
+        private int bank;
 
-        private PadAction(MixTrackController.PAD triggerPad, Runnable action) {
+        private PadAction(MixTrackController.PAD triggerPad, int bank, Runnable action) {
             this.triggerPad = triggerPad;
+            this.bank = bank;
             this.action = action;
             userEvents = new ArrayList<>();
         }
@@ -256,6 +293,10 @@ public class Song {
             if (!userEvents.contains(userEvent)) {
                 userEvents.add(userEvent);
             }
+        }
+
+        public int getBank() {
+            return bank;
         }
 
         public Runnable getAction() {

@@ -24,14 +24,14 @@ public class Library {
 
     private Song createHowYouRemindMe() {
         Song hyrm = new Song("How you remind me", "Nickelback", 172, 4,
-                new BeatStamp(22, 1), MixTrackController.PAD.PAD_0X0);
+                new BeatStamp(22, 1), MixTrackController.PAD.PAD_0X1);
 
         Song.PadAction padAction;
         Song.UserEvent userEvent;
 
         // Pad Action
         MixTrackController.PAD triggerPad = MixTrackController.PAD.PAD_0X1;
-        padAction = hyrm.addPadAction(triggerPad, new Runnable() {
+        padAction = hyrm.addPadAction(triggerPad, 0, new Runnable() {
             @Override
             public void run() {
                 //TODO: Implement
@@ -54,7 +54,7 @@ public class Library {
 
         // Pad Action
         triggerPad = MixTrackController.PAD.PAD_0X0;
-        padAction = hyrm.addPadAction(triggerPad, new Runnable() {
+        padAction = hyrm.addPadAction(triggerPad, 0, new Runnable() {
             @Override
             public void run() {
                 //TODO: Implement
@@ -77,7 +77,7 @@ public class Library {
 
         // Pad Action
         triggerPad = MixTrackController.PAD.PAD_1X1;
-        padAction = hyrm.addPadAction(triggerPad, new Runnable() {
+        padAction = hyrm.addPadAction(triggerPad, 0, new Runnable() {
             @Override
             public void run() {
                 //TODO: Implement

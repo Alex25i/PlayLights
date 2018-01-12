@@ -24,6 +24,7 @@ public class SongPlayerController {
     private double zoomFactor = 1;
 
     private AnimationTimer songGridAnimation;
+    private boolean animationRunning;
 
     @FXML
     private Pane rootPane;
@@ -72,7 +73,6 @@ public class SongPlayerController {
                                 songGrid.setLayoutX(currentPxPos);
                             }
                         }
-
                     }
                     stopAnimation();
                     return;
@@ -109,24 +109,25 @@ public class SongPlayerController {
                     //song ended
                     songEnd.run();
                 }
-
-                if (!player.getTimeCode().isRunning() && !player.getTimeCode().atFirstBeat()) {
-                    //timeCode currently waiting at the first beat of the song
-                    stopAnimation();
-                    // do this after the animation positioning, so that the animation get stopped at the beginning
-                    // of the beat
-                }
             }
         };
-
+        animationRunning = false;
     }
 
     public void startAnimation() {
+        if (animationRunning) {
+            return;
+        }
         songGridAnimation.start();
+        animationRunning = true;
     }
 
     public void stopAnimation() {
+        if (!animationRunning) {
+            return;
+        }
         songGridAnimation.stop();
+        animationRunning = false;
     }
 
 
@@ -240,5 +241,9 @@ public class SongPlayerController {
 
     public static SongPlayerController getSongPlayerController() {
         return songPlayerController;
+    }
+
+    public boolean animationIsRunning() {
+        return animationRunning;
     }
 }

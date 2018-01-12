@@ -16,8 +16,6 @@ public class MixTrackController {
 
     public enum BLINK_DURATION {BARS4, BARS2, BARS1}
 
-    private Map<Byte, Timer> blinkingLEDs;
-
     // ------ midi note (Message type 0x90) ------
 
     // pads
@@ -205,18 +203,16 @@ public class MixTrackController {
     public static final byte PITCH_BEND_MID_A_LED_ADDRESS = 0x28;
     public static final byte PITCH_BEND_MID_B_LED_ADDRESS = 0x29;
 
+    private Map<Byte, Timer> blinkingLEDs;
+    private int activeBank;
+
     MixTrackController() {
         blinkingLEDs = new HashMap<>();
+        activeBank = 0;
     }
 
     public void prepareSong(Song currentSong) {
-        for (Song.PadAction padAction : currentSong.getPadActions().values()) {
-            List<Byte> padLEDAddresses = getPadLedAddresses(padAction.getTriggerPad());
-            for (Byte padAddress : padLEDAddresses) {
-                setLedIllumination(padAddress, true);
-            }
-        }
-        StartBlinkLed(PLAY_B_LED_ADDRESS, 1500);
+        startBlinkLed(PLAY_B_LED_ADDRESS, 1500);
     }
 
     public void reconnectRoutine() {
@@ -257,10 +253,10 @@ public class MixTrackController {
 
     }
 
-    public void StartBlinkLed(final byte LED_ADDRESS, int blinkPeriod) {
+    public void startBlinkLed(final byte LED_ADDRESS, int blinkPeriod) {
         if (blinkingLEDs.containsKey(LED_ADDRESS)) {
-            // LED already blinking
-            return;
+            // stop old timer and remove it from map
+            blinkingLEDs.remove(LED_ADDRESS).cancel();
         }
         blinkingLEDs.put(LED_ADDRESS, new Timer("Blink of " + LED_ADDRESS));
         // use boolean inside a List so that the list object van be final
@@ -305,59 +301,12 @@ public class MixTrackController {
                 PlayLights.getPlayLights().getMidiOrganizer().getMixTrackDeviceConnector());
     }
 
-    private List<Byte> getPadLedAddresses(PAD pad) {
-        ArrayList<Byte> padAddresses = new ArrayList<>();
-        switch (pad) {
-            case PAD_0X0:
-                padAddresses.add(PAD_0X0_LED_ADDRESS);
-                return padAddresses;
-            case PAD_1X0:
-                padAddresses.add(PAD_1X0_LED_ADDRESS);
-                return padAddresses;
-            case PAD_2X0:
-                padAddresses.add(PAD_2X0_LED_ADDRESS);
-                return padAddresses;
-            case PAD_3X0:
-                padAddresses.add(PAD_3X0_LED_ADDRESS);
-                return padAddresses;
-            case PAD_4X0:
-                padAddresses.add(PAD_4X0_LED_ADDRESS);
-                return padAddresses;
-            case PAD_5X0:
-                padAddresses.add(PAD_5X0_LED_ADDRESS);
-                return padAddresses;
-            case PAD_6X0:
-                padAddresses.add(PAD_6X0_LED_ADDRESS);
-                return padAddresses;
-            case PAD_7X0:
-                padAddresses.add(PAD_7X0_LED_ADDRESS);
-                return padAddresses;
-            case PAD_0X1:
-                return PAD_0X1_LED_ADDRESS;
-            case PAD_1X1:
-                return PAD_1X1_LED_ADDRESS;
-            case PAD_2X1:
-                return PAD_2X1_LED_ADDRESS;
-            case PAD_3X1:
-                return PAD_3X1_LED_ADDRESS;
-            case PAD_4X1:
-                return PAD_4X1_LED_ADDRESS;
-            case PAD_5X1:
-                return PAD_5X1_LED_ADDRESS;
-            case PAD_6X1:
-                return PAD_6X1_LED_ADDRESS;
-            case PAD_7X1:
-                return PAD_7X1_LED_ADDRESS;
-        }
-        return null;
-    }
-
     /**
      * @param pad_address the address of the returning {@link PAD}
      * @return the {@link PAD} from the given <code>pad_address</code> or null if the given address doesn't
      * relate to any {@link PAD}
      */
-    public PAD getPadFromAddress(byte pad_address) {
+    public static PAD getPadFromAddress(byte pad_address) {
         switch (pad_address) {
             case PAD_0X0_ADDRESS:
                 return PAD_0X0;
@@ -415,6 +364,19 @@ public class MixTrackController {
     }
 
     /**
+     * checks if given pad is a bank root pad
+     * this is the case if it is a pad from the bottom line (os its name is PAD_?X1)
+     *
+     * @param pad the {@link PAD} that's get checked
+     * @return true, if <code>pad</code> is a bank root
+     */
+    public static boolean padIsBankRoot(PAD pad) {
+        // the bottom line pads are the root pads.
+        // They have in common that they all have multiple addresses, so you can just check their number of LED addresses
+        return getPadLedAddresses(pad).size() > 1;
+    }
+
+    /**
      * turns of all default illuminated LEDs of the controller
      */
     public void blackoutStartLEDs() {
@@ -435,10 +397,153 @@ public class MixTrackController {
         setLedIllumination(CUE_MODE_B_LED, false);
     }
 
+    private static List<Byte> getPadLedAddresses(PAD pad) {
+        ArrayList<Byte> padAddresses = new ArrayList<>();
+        switch (pad) {
+            case PAD_0X0:
+                padAddresses.add(PAD_0X0_LED_ADDRESS);
+                return padAddresses;
+            case PAD_1X0:
+                padAddresses.add(PAD_1X0_LED_ADDRESS);
+                return padAddresses;
+            case PAD_2X0:
+                padAddresses.add(PAD_2X0_LED_ADDRESS);
+                return padAddresses;
+            case PAD_3X0:
+                padAddresses.add(PAD_3X0_LED_ADDRESS);
+                return padAddresses;
+            case PAD_4X0:
+                padAddresses.add(PAD_4X0_LED_ADDRESS);
+                return padAddresses;
+            case PAD_5X0:
+                padAddresses.add(PAD_5X0_LED_ADDRESS);
+                return padAddresses;
+            case PAD_6X0:
+                padAddresses.add(PAD_6X0_LED_ADDRESS);
+                return padAddresses;
+            case PAD_7X0:
+                padAddresses.add(PAD_7X0_LED_ADDRESS);
+                return padAddresses;
+            case PAD_0X1:
+                return PAD_0X1_LED_ADDRESS;
+            case PAD_1X1:
+                return PAD_1X1_LED_ADDRESS;
+            case PAD_2X1:
+                return PAD_2X1_LED_ADDRESS;
+            case PAD_3X1:
+                return PAD_3X1_LED_ADDRESS;
+            case PAD_4X1:
+                return PAD_4X1_LED_ADDRESS;
+            case PAD_5X1:
+                return PAD_5X1_LED_ADDRESS;
+            case PAD_6X1:
+                return PAD_6X1_LED_ADDRESS;
+            case PAD_7X1:
+                return PAD_7X1_LED_ADDRESS;
+            default:
+                return null;
+        }
+    }
+
     private Thread createBlinkRunnable(PAD pad, BLINK_DURATION blink_duration, int tempo) {
         return new Thread(() -> {
             // TODO.contains(pad_address) { implement Method
             // TODO: HOW about interrupting the thread
         });
+    }
+
+    public int getActiveBank() {
+        return activeBank;
+    }
+
+    public void updateActiveBank(PAD pad, Song currentSong) {
+        switch (pad) {
+            case PAD_0X1:
+                activeBank = 0;
+                setLedIllumination(LOOP_MODE_A_LED, true);
+                setLedIllumination(SAMPLE_MODE_A_LED, false);
+                setLedIllumination(CUE_MODE_A_LED, false);
+                setLedIllumination(LOOP_MODE_B_LED, false);
+                setLedIllumination(SAMPLE_MODE_B_LED, false);
+                setLedIllumination(CUE_MODE_B_LED, false);
+                break;
+            case PAD_1X1:
+                activeBank = 1;
+                setLedIllumination(LOOP_MODE_A_LED, false);
+                setLedIllumination(SAMPLE_MODE_A_LED, true);
+                setLedIllumination(CUE_MODE_A_LED, false);
+                setLedIllumination(LOOP_MODE_B_LED, false);
+                setLedIllumination(SAMPLE_MODE_B_LED, false);
+                setLedIllumination(CUE_MODE_B_LED, false);
+                break;
+            case PAD_2X1:
+                activeBank = 2;
+                setLedIllumination(LOOP_MODE_A_LED, false);
+                setLedIllumination(SAMPLE_MODE_A_LED, false);
+                setLedIllumination(CUE_MODE_A_LED, true);
+                setLedIllumination(LOOP_MODE_B_LED, false);
+                setLedIllumination(SAMPLE_MODE_B_LED, false);
+                setLedIllumination(CUE_MODE_B_LED, false);
+                break;
+            case PAD_4X1:
+                activeBank = 3;
+                setLedIllumination(LOOP_MODE_A_LED, false);
+                setLedIllumination(SAMPLE_MODE_A_LED, false);
+                setLedIllumination(CUE_MODE_A_LED, false);
+                setLedIllumination(LOOP_MODE_B_LED, true);
+                setLedIllumination(SAMPLE_MODE_B_LED, false);
+                setLedIllumination(CUE_MODE_B_LED, false);
+                break;
+            case PAD_5X1:
+                activeBank = 4;
+                setLedIllumination(LOOP_MODE_A_LED, false);
+                setLedIllumination(SAMPLE_MODE_A_LED, false);
+                setLedIllumination(CUE_MODE_A_LED, false);
+                setLedIllumination(LOOP_MODE_B_LED, false);
+                setLedIllumination(SAMPLE_MODE_B_LED, true);
+                setLedIllumination(CUE_MODE_B_LED, false);
+                break;
+            case PAD_6X1:
+                activeBank = 5;
+                setLedIllumination(LOOP_MODE_A_LED, false);
+                setLedIllumination(SAMPLE_MODE_A_LED, false);
+                setLedIllumination(CUE_MODE_A_LED, false);
+                setLedIllumination(LOOP_MODE_B_LED, false);
+                setLedIllumination(SAMPLE_MODE_B_LED, false);
+                setLedIllumination(CUE_MODE_B_LED, true);
+                break;
+            default:
+                activeBank = 0;
+                if (PlayLights.verbose) {
+                    new IllegalArgumentException("There is no bank associated with the pad" + pad.toString()).printStackTrace();
+                }
+                setLedIllumination(LOOP_MODE_A_LED, true);
+                setLedIllumination(SAMPLE_MODE_A_LED, false);
+                setLedIllumination(CUE_MODE_A_LED, false);
+                setLedIllumination(LOOP_MODE_B_LED, false);
+                setLedIllumination(SAMPLE_MODE_B_LED, false);
+                setLedIllumination(CUE_MODE_B_LED, false);
+        }
+
+
+        // crete a map which defines all Pad LEDs and their target illumination status
+        Map<Byte, Boolean> targetLEDStatus = new HashMap<>(32);
+
+        for (PAD padEnum : PAD.values()) {
+            for (Byte padAddress : MixTrackController.getPadLedAddresses(padEnum)) {
+                targetLEDStatus.put(padAddress, false);
+            }
+        }
+        for (Song.PadAction padAction : currentSong.getPadActionsFromBank(activeBank)) {
+            for (Byte padAddress : getPadLedAddresses(padAction.getTriggerPad())) {
+                targetLEDStatus.put(padAddress, true);
+            }
+        }
+
+        for (PAD padEnum : PAD.values()) {
+            for (Byte padAddress : MixTrackController.getPadLedAddresses(padEnum)) {
+                setLedIllumination(padAddress, targetLEDStatus.get(padAddress));
+            }
+        }
     }
 }
