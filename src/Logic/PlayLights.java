@@ -21,8 +21,8 @@ public class PlayLights extends Application {
     public PlayLights() {
         verbose = true;
         playLights = this;
-        library = new Library();
         midiOrganizer = new MidiOrganizer();
+        library = new Library();
         midiOrganizer.getMixTrackController().blackoutStartLEDs();
     }
 

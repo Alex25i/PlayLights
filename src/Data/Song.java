@@ -3,6 +3,7 @@ package Data;
 import Logic.PlayLights;
 import Midi.MixTrackController;
 
+import javax.sound.midi.ShortMessage;
 import java.util.*;
 
 public class Song {
@@ -13,19 +14,21 @@ public class Song {
     private int beatsPerBar;
 
     private BeatStamp lastBeat;
+    private ShortMessage startUpMessage;
     private List<UserEvent> userEvents;
     private Map<MixTrackController.PAD, PadAction[]> padActions;
     // pad at which the player will automatically trigger the beginning of the song (if it is loaded)
     // Can be null, if this feature is not desired for the song (manual start required)
     private MixTrackController.PAD autoStartPad;
 
-    public Song(String name, String interpret, int tempo, int beatsPerBar, BeatStamp lastBeat,
+    public Song(String name, String interpret, int tempo, int beatsPerBar, BeatStamp lastBeat, ShortMessage startUpMessage,
                 MixTrackController.PAD autoStartPad) {
         this.name = name;
         this.interpret = interpret;
         this.tempo = tempo;
         this.userEvents = new ArrayList<>();
         this.beatsPerBar = beatsPerBar;
+        this.startUpMessage = startUpMessage;
         padActions = new HashMap<>(16);
         this.lastBeat = lastBeat;
         this.autoStartPad = autoStartPad;
@@ -144,38 +147,6 @@ public class Song {
             }
         }
         return padActionList;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getInterpret() {
-        return interpret;
-    }
-
-    public int getTempo() {
-        return tempo;
-    }
-
-    public int getBeatsPerBar() {
-        return beatsPerBar;
-    }
-
-    public BeatStamp getLastBeat() {
-        return lastBeat;
-    }
-
-    public List<UserEvent> getUserEvents() {
-        return userEvents;
-    }
-
-    public Map<MixTrackController.PAD, PadAction[]> getPadActions() {
-        return padActions;
-    }
-
-    public MixTrackController.PAD getAutoStartPad() {
-        return autoStartPad;
     }
 
     /**
@@ -304,5 +275,40 @@ public class Song {
         }
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getInterpret() {
+        return interpret;
+    }
+
+    public int getTempo() {
+        return tempo;
+    }
+
+    public int getBeatsPerBar() {
+        return beatsPerBar;
+    }
+
+    public BeatStamp getLastBeat() {
+        return lastBeat;
+    }
+
+    public ShortMessage getStartUpMessage() {
+        return startUpMessage;
+    }
+
+    public List<UserEvent> getUserEvents() {
+        return userEvents;
+    }
+
+    public Map<MixTrackController.PAD, PadAction[]> getPadActions() {
+        return padActions;
+    }
+
+    public MixTrackController.PAD getAutoStartPad() {
+        return autoStartPad;
+    }
 
 }

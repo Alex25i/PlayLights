@@ -3,6 +3,7 @@ package Logic;
 import Data.BeatStamp;
 import Data.Song;
 import GUI.SongPlayerController;
+import Midi.MidiOrganizer;
 import Midi.MixTrackController;
 
 import java.util.ArrayList;
@@ -11,11 +12,18 @@ public class SongPlayer {
     private Song currentSong;
     private LiveTimeCode timeCode;
     private TempoRecognition tempoRecognition; // currently not used
+    private TriggerJobs triggerJobs;
 
 
     public SongPlayer(Song currentSong) {
         this.currentSong = currentSong;
         timeCode = new LiveTimeCode(currentSong);
+        triggerJobs = new TriggerJobs(timeCode);
+
+        MidiOrganizer midiOrganizer = PlayLights.getPlayLights().getMidiOrganizer();
+        midiOrganizer.sendMidiMessage(currentSong.getStartUpMessage(), midiOrganizer.getMpcDeviceConnector());
+
+
         PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().prepareSong(currentSong);
 
         // TODO: This not the final implementation
@@ -87,7 +95,7 @@ public class SongPlayer {
         if (!timeCode.isRunning()) {
             return;
         }
-
+        triggerJobs.stopAllTimer();
         padAction.getAction().run();
 
         if (timeCode.isRunning() && currentSong.calcBeatDistance(currentSong.getLastBeat(), timeCode.calcCurrentBeatPos()) >= 0) {
@@ -138,6 +146,9 @@ public class SongPlayer {
                 && currentSong.calcBeatDistance(currentSong.getLastBeat(), timeCode.calcCurrentBeatPos()) >= 0)) {
 
             //song is stopped not at the beginning of the song or the song is running after the last beat of the song
+            MidiOrganizer mo = PlayLights.getPlayLights().getMidiOrganizer();
+            mo.sendMidiMessage(currentSong.getStartUpMessage(), mo.getMpcDeviceConnector());
+
             timeCode.reset();
             SongPlayerController.getSongPlayerController().resetAnimationPosition();
             PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.CUE_B_LED_ADDRESS);
@@ -160,6 +171,10 @@ public class SongPlayer {
 
     public LiveTimeCode getTimeCode() {
         return timeCode;
+    }
+
+    public TriggerJobs getTriggerJobs() {
+        return triggerJobs;
     }
 
     public TempoRecognition getTempoRecognition() {
