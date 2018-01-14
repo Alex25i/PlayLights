@@ -31,9 +31,6 @@
             </menus>
         </MenuBar>
         <AnchorPane fx:id="tableContainer" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-            <children>
-                <TableView fx:id="gigTable" prefHeight="375.0" prefWidth="600.0"/>
-            </children>
         </AnchorPane>
     </children>
 </VBox>

@@ -26,7 +26,7 @@ public class PlayLights extends Application {
         //midiOrganizer = new MidiOrganizer();
         library = new Library();
         //midiOrganizer.getMixTrackController().blackoutStartLEDs();
-        //playLights.createTestGigs();
+        playLights.createTestGigs();
     }
 
     /**
