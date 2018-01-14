@@ -1,5 +1,6 @@
 package Logic;
 
+import Data.Gig;
 import Data.Library;
 import Midi.MidiOrganizer;
 import javafx.application.Application;
@@ -8,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.net.URL;
+import java.time.LocalDate;
 
 public class PlayLights extends Application {
     public static boolean verbose = false;
@@ -21,9 +23,10 @@ public class PlayLights extends Application {
     public PlayLights() {
         verbose = true;
         playLights = this;
-        midiOrganizer = new MidiOrganizer();
+        //midiOrganizer = new MidiOrganizer();
         library = new Library();
-        midiOrganizer.getMixTrackController().blackoutStartLEDs();
+        //midiOrganizer.getMixTrackController().blackoutStartLEDs();
+        //playLights.createTestGigs();
     }
 
     /**
@@ -45,7 +48,7 @@ public class PlayLights extends Application {
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
 
-        String resourcePath = "../GUI/SongPlayer.fxml";
+        String resourcePath = "../GUI/SongCenter.fxml";
         URL location = getClass().getResource(resourcePath);
         FXMLLoader fxmlLoader = new FXMLLoader(location);
 
@@ -57,7 +60,16 @@ public class PlayLights extends Application {
 
         // TODO: Move this to an appropriate location
 
-        songPlayer = new SongPlayer(PlayLights.getPlayLights().getLibrary().getSongList().get(0));
+        //songPlayer = new SongPlayer(PlayLights.getPlayLights().getLibrary().getSongList().get(0));
+    }
+
+    private void createTestGigs() {
+        Gig gig = library.createGig();
+        gig.setDate(LocalDate.of(1018, 3, 11));
+        gig.setLocation("Musikschule");
+        gig = library.createGig();
+        gig.setDate(LocalDate.of(1018, 7, 3));
+        gig.setLocation("Musikschule");
     }
 
     public Stage getPrimaryStage() {

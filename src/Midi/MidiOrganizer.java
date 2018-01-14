@@ -99,7 +99,7 @@ public class MidiOrganizer {
         deviceConnector.getReceiver().send(message, -1);
     }
 
-    public ShortMessage createMidiMessage(int messageType, int channel, int note, int velocity) {
+    public static ShortMessage createMidiMessage(int messageType, int channel, int note, int velocity) {
         ShortMessage message = new ShortMessage();
         try {
             message.setMessage(messageType & 0xff, channel & 0xff, note & 0xFF, velocity & 0xFF);

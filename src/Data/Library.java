@@ -24,9 +24,8 @@ public class Library {
 
     private Song createHowYouRemindMe() {
         Song hyrm = new Song("How you remind me", "Nickelback", 172, 4,
-                new BeatStamp(50, 1), PlayLights.getPlayLights().getMidiOrganizer().
-                createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 0, MidiOrganizer.VELOCITY_FULL),
-                MixTrackController.PAD.PAD_0X1);
+                new BeatStamp(50, 1), MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON,
+                2, 0, MidiOrganizer.VELOCITY_FULL), MixTrackController.PAD.PAD_0X1);
 
         MixTrackController.PAD triggerPad;
         Song.UserEvent userEvent;
@@ -67,12 +66,10 @@ public class Library {
                 //TODO: Implement
                 // Example
 
-                MidiOrganizer mo = PlayLights.getPlayLights().getMidiOrganizer();
-
                 PlayLights.getPlayLights().getSongPlayer().getTriggerJobs().schedulePeriodicJop(0, 4, 1,
-                        mo.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 2, MidiOrganizer.VELOCITY_FULL));
+                        MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 2, MidiOrganizer.VELOCITY_FULL));
                 PlayLights.getPlayLights().getSongPlayer().getTriggerJobs().schedulePeriodicJop(4, 8, 0.5,
-                        mo.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 3, MidiOrganizer.VELOCITY_FULL));
+                        MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 3, MidiOrganizer.VELOCITY_FULL));
             }
         });
 
@@ -112,6 +109,12 @@ public class Library {
 
 
         return hyrm;
+    }
+
+    public Gig createGig() {
+        Gig gig = new Gig();
+        gigList.add(gig);
+        return gig;
     }
 
     public List<Song> getSongList() {

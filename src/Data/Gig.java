@@ -20,6 +20,15 @@ public class Gig {
         this("unnamedLocation", date);
     }
 
+    public Gig() {
+    }
+
+    public SetList createSet() {
+        SetList setList = new SetList();
+        sets.add(setList);
+        return setList;
+    }
+
     public ArrayList<SetList> getSets() {
         return sets;
     }
