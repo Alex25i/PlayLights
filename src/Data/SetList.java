@@ -20,6 +20,10 @@ public class SetList {
         return songs;
     }
 
+    public void addSong(Song song) {
+        songs.add(song);
+    }
+
     public String getName() {
         return name;
     }

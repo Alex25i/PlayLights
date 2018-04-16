@@ -4,6 +4,9 @@ import Data.Gig;
 import Data.SetList;
 import Data.Song;
 import Logic.PlayLights;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,7 +17,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
 public class SongCenterController {
-    public enum VIEW_MODES {GIG, SET, SONG}
+    public enum VIEW_MODES {GIG, SONG}
 
     private static SongCenterController songCenterController;
 
@@ -23,8 +26,7 @@ public class SongCenterController {
 
     private VIEW_MODES viewMode;
     private TableView<Gig> gigTable;
-    private TableView<SetList> setsList;
-    private TableView<Song> songTable;
+    private TableView<TableSong> songTable;
     private ObservableList<Gig> gigs;
 
     @FXML
@@ -32,6 +34,7 @@ public class SongCenterController {
         songCenterController = this;
         gigs = FXCollections.observableArrayList();
         setupTableGigs();
+        setupTableSongs();
         showTable(gigTable);
     }
 
@@ -63,34 +66,93 @@ public class SongCenterController {
         dateColumn.setReorderable(false);
         locationColumn.setReorderable(false);
 
-        if (!gigs.isEmpty()) {
-            gigTable.getSelectionModel().select(0, dateColumn);
-        }
+        gigTable.getSelectionModel().clearAndSelect(0);
     }
 
-    private void setupTableSongs(Gig gig) {
-        //TODO: Change Implementation to songs of a set, only
-
-        ObservableList<Song> songs = FXCollections.observableArrayList();
-        for (SetList set : gig.getSets()) {
-            songs.addAll(set.getSongs());
-        }
-
+    private void setupTableSongs() {
         songTable = new TableView<>();
-        songTable.setItems(songs);
 
-        TableColumn<Song, String> positionColumn = new TableColumn<>("Position");
+        TableColumn<TableSong, Integer> setNrColumn = new TableColumn<>("Set Nr.");
+        setNrColumn.setCellValueFactory(param -> param.getValue().setNr);
+        songTable.getColumns().add(setNrColumn);
+
+        TableColumn<TableSong, Integer> positionColumn = new TableColumn<>("Position");
+        positionColumn.setCellValueFactory(param -> param.getValue().position);
         songTable.getColumns().add(positionColumn);
 
-        TableColumn<Song, String> nameColumn = new TableColumn<>("name");
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        TableColumn<TableSong, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().song.getName()));
         songTable.getColumns().add(nameColumn);
+
+        TableColumn<TableSong, String> interpretColumn = new TableColumn<>("Interpret");
+        interpretColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().song.getInterpret()));
+        songTable.getColumns().add(interpretColumn);
+
+        TableColumn<TableSong, Integer> songLengthColumn = new TableColumn<>("Length [bars]");
+        songLengthColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().song.getLastBeat().getBarNr() + 1));
+        songTable.getColumns().add(songLengthColumn);
+
+        TableColumn<TableSong, Integer> tempoColumn = new TableColumn<>("Tempo");
+        tempoColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().song.getTempo()));
+        songTable.getColumns().add(tempoColumn);
+
 
         songTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         songTable.setEditable(false);
+        songTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        songTable.prefWidthProperty().bind(tableContainer.widthProperty());
 
-        if (!songs.isEmpty()) {
-            songTable.getSelectionModel().select(0);
+        setNrColumn.setMinWidth(50);
+        setNrColumn.setMaxWidth(50);
+        positionColumn.setMinWidth(60);
+        positionColumn.setMaxWidth(60);
+
+        interpretColumn.setMinWidth(120);
+        interpretColumn.setMaxWidth(120);
+        songLengthColumn.setMinWidth(100);
+        songLengthColumn.setMaxWidth(100);
+        tempoColumn.setMinWidth(50);
+        tempoColumn.setMaxWidth(50);
+
+
+
+        setNrColumn.setReorderable(false);
+        positionColumn.setReorderable(false);
+        nameColumn.setReorderable(false);
+        interpretColumn.setReorderable(false);
+        songLengthColumn.setReorderable(false);
+        tempoColumn.setReorderable(false);
+
+
+        setNrColumn.setReorderable(false);
+    }
+
+    private ObservableList<TableSong> generateSongPosition(Gig gig) {
+        ObservableList<TableSong> tableSongs = FXCollections.observableArrayList();
+        for (int i = 0; i < gig.getSets().size(); i++) {
+            SetList set = gig.getSets().get(i);
+            for (int j = 0; j < set.getSongs().size(); j++) {
+                Song song = set.getSongs().get(j);
+                tableSongs.add(new TableSong(song, new SimpleObjectProperty<>(j + 1), new SimpleObjectProperty<>(i + 1)));
+            }
+        }
+        return tableSongs;
+    }
+
+    private class TableSong {
+        public Song song;
+        public ObservableValue<Integer> position; // the position of the song in the set
+        public ObservableValue<Integer> setNr;    // the position of the set in the gig
+
+        /**
+         * @param song     the song revered to
+         * @param position the position of the song in the set
+         * @param setNr    the position of the set in the gig
+         */
+        public TableSong(Song song, ObservableValue<Integer> position, ObservableValue<Integer> setNr) {
+            this.song = song;
+            this.position = position;
+            this.setNr = setNr;
         }
     }
 
@@ -109,9 +171,17 @@ public class SongCenterController {
         selection(2);
     }
 
+    public void selectionSelectPress() {
+        selection(3);
+    }
+
+    public void selectionBackPress() {
+        selection(4);
+    }
+
     private void selection(int action) {
         if (tableContainer.getChildren().isEmpty()) {
-            // there is no tabele displayed currently
+            // there is no table displayed currently
             new IllegalStateException("There is no table displayed at the SongCenter, currently. Check implementation").printStackTrace();
             return;
         }
@@ -120,17 +190,55 @@ public class SongCenterController {
                 int currentSelectedIndex = gigTable.getSelectionModel().getSelectedIndex();
                 if (action == 1) {
                     // left action
-
                     if (currentSelectedIndex > 0) {
                         // it is not the last element which is currently selected
                         gigTable.getSelectionModel().clearAndSelect(currentSelectedIndex - 1);
                     }
+
                 } else if (action == 2) {
                     // right action
                     if (currentSelectedIndex < gigTable.getItems().size() - 1) {
                         // it is not the last element which is currently selected
                         gigTable.getSelectionModel().clearAndSelect(currentSelectedIndex + 1);
                     }
+
+                } else if (action == 3) {
+                    // press action
+                    if (gigTable.getSelectionModel().isEmpty()) {
+                        // no list item selected
+                        break;
+                    }
+                    songTable.setItems(generateSongPosition(gigTable.getSelectionModel().getSelectedItem()));
+                    songTable.getSelectionModel().clearAndSelect(0);
+                    showTable(songTable);
+                }
+                break;
+            }
+            case SONG: {
+                int currentSelectedIndex = songTable.getSelectionModel().getSelectedIndex();
+                if (action == 1) {
+                    // left action
+                    if (currentSelectedIndex > 0) {
+                        // it is not the last element which is currently selected
+                        songTable.getSelectionModel().clearAndSelect(currentSelectedIndex - 1);
+                    }
+
+                } else if (action == 2) {
+                    // right action
+                    if (currentSelectedIndex < songTable.getItems().size() - 1) {
+                        // it is not the last element which is currently selected
+                        songTable.getSelectionModel().clearAndSelect(currentSelectedIndex + 1);
+                    }
+
+                } else if (action == 3) {
+                    // press action
+                    if (songTable.getSelectionModel().isEmpty()) {
+                        // no list item selected
+                        break;
+                    }
+                    //TODO: Load song
+                } else if (action == 4) {
+                    showTable(gigTable);
                 }
                 break;
             }
@@ -138,18 +246,18 @@ public class SongCenterController {
     }
 
     private void showTable(TableView table) {
-        if (tableContainer.getChildren().isEmpty()) {
-            tableContainer.getChildren().add(table);
-        } else {
-            tableContainer.getChildren().set(0, table);
-        }
-        if (table == gigTable) {
-            viewMode = VIEW_MODES.GIG;
-        } else if (table == setsList) {
-            viewMode = VIEW_MODES.SET;
-        } else if (table == songTable) {
-            viewMode = VIEW_MODES.SONG;
-        }
+        Platform.runLater(() -> {
+            if (tableContainer.getChildren().isEmpty()) {
+                tableContainer.getChildren().add(table);
+            } else {
+                tableContainer.getChildren().set(0, table);
+            }
+            if (table == gigTable) {
+                viewMode = VIEW_MODES.GIG;
+            } else if (table == songTable) {
+                viewMode = VIEW_MODES.SONG;
+            }
+        });
     }
 
     public static SongCenterController getInstance() {

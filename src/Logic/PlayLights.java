@@ -2,6 +2,7 @@ package Logic;
 
 import Data.Gig;
 import Data.Library;
+import Data.SetList;
 import Midi.MidiOrganizer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -27,7 +28,7 @@ public class PlayLights extends Application {
         midiOrganizer = new MidiOrganizer();
         library = new Library();
         midiOrganizer.getMixTrackController().blackoutStartLEDs();
-        createTestGigs();
+        createTestData();
     }
 
     /**
@@ -58,20 +59,18 @@ public class PlayLights extends Application {
         primaryStage.setScene(scene);
         primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.show();
-
-        // TODO: Move this to an appropriate location
-        //songPlayer = new SongPlayer(PlayLights.getInstance().getLibrary().getSongList().get(0));
-
-
     }
 
-    private void createTestGigs() {
-        Gig gig = library.createGig();
-        gig.setDate(LocalDate.of(2018, 3, 11));
-        gig.setLocation("Musikschule");
-        gig = library.createGig();
-        gig.setDate(LocalDate.of(2018, 7, 1));
-        gig.setLocation("Vaihingen");
+    private void createTestData() {
+        Gig gig = library.createGig("Musikschule", LocalDate.of(2018, 3, 11));
+        SetList set = gig.createSet();
+        set.addSong(library.getSongList().get(0));
+        set.addSong(library.getSongList().get(0));
+        set.addSong(library.getSongList().get(0));
+
+        gig = library.createGig("Musikschule", LocalDate.of(2018, 3, 11));
+        set = gig.createSet();
+        set.addSong(library.getSongList().get(0));
     }
 
     public Stage getPrimaryStage() {

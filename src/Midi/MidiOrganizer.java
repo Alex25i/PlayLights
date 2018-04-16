@@ -69,11 +69,17 @@ public class MidiOrganizer {
 
             } else if (SongCenterController.getInstance() != null) {
                 // there is songCenter currently displayed, but there is NO song loaded currently
-                if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.BROWSE_TURN_ADDRESS && midiVelocity == VELOCITY_FULL) {
-                    SongCenterController.getInstance().selectionLeft();
-                } else {
-                    // if it is not left, is it always right
-                    SongCenterController.getInstance().selectionRight();
+                if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.BROWSE_TURN_ADDRESS) {
+                    if (midiVelocity == VELOCITY_FULL) {
+                        SongCenterController.getInstance().selectionLeft();
+                    } else {
+                        // if it is not left, is it always right
+                        SongCenterController.getInstance().selectionRight();
+                    }
+                } else if (midiType == MESSAGE_TYPE_NODE_ON && midiNode == MixTrackController.BROWSE_PUSH_ADDRESS && midiVelocity == VELOCITY_FULL) {
+                    SongCenterController.getInstance().selectionSelectPress();
+                } else if (midiType == MESSAGE_TYPE_NODE_ON && midiNode == MixTrackController.BROWSE_BACK_ADDRESS && midiVelocity == VELOCITY_FULL) {
+                    SongCenterController.getInstance().selectionBackPress();
                 }
 
             }

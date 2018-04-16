@@ -2,25 +2,17 @@ package Data;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Gig {
 
 
-    private ArrayList<SetList> sets;
+    private List<SetList> sets;
     private String location;
     private LocalDate date;
 
-    public Gig(String location, LocalDate date) {
-        this.location = location;
-        this.date = date;
-        sets = new ArrayList<>(3);
-    }
-
-    public Gig(LocalDate date) {
-        this("unnamedLocation", date);
-    }
-
     public Gig() {
+        sets = new ArrayList<>();
     }
 
     public SetList createSet() {
@@ -29,7 +21,7 @@ public class Gig {
         return setList;
     }
 
-    public ArrayList<SetList> getSets() {
+    public List<SetList> getSets() {
         return sets;
     }
 
