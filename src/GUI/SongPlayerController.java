@@ -239,7 +239,7 @@ public class SongPlayerController {
 
     }
 
-    public static SongPlayerController getSongPlayerController() {
+    public static SongPlayerController getInstance() {
         return songPlayerController;
     }
 

@@ -1,5 +1,6 @@
 package Data;
 
+import GUI.SongCenterController;
 import Logic.PlayLights;
 import Midi.MidiOrganizer;
 import Midi.MixTrackController;
@@ -39,7 +40,7 @@ public class Library {
             public void run() {
                 //TODO: Implement
                 // Example
-                MidiOrganizer mo = PlayLights.getPlayLights().getMidiOrganizer();
+                MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
                 mo.sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 1, MidiOrganizer.VELOCITY_FULL,
                         mo.getMpcDeviceConnector());
             }
@@ -66,9 +67,9 @@ public class Library {
                 //TODO: Implement
                 // Example
 
-                PlayLights.getPlayLights().getSongPlayer().getTriggerJobs().schedulePeriodicJop(0, 4, 1,
+                PlayLights.getInstance().getSongPlayer().getTriggerJobs().schedulePeriodicJop(0, 4, 1,
                         MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 2, MidiOrganizer.VELOCITY_FULL));
-                PlayLights.getPlayLights().getSongPlayer().getTriggerJobs().schedulePeriodicJop(4, 8, 0.5,
+                PlayLights.getInstance().getSongPlayer().getTriggerJobs().schedulePeriodicJop(4, 8, 0.5,
                         MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 3, MidiOrganizer.VELOCITY_FULL));
             }
         });
@@ -91,9 +92,10 @@ public class Library {
             public void run() {
                 //TODO: Implement
                 // Example
-                MidiOrganizer mo = PlayLights.getPlayLights().getMidiOrganizer();
-                mo.sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 4, MidiOrganizer.VELOCITY_FULL,
-                        mo.getMpcDeviceConnector());
+                MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
+                PlayLights.getInstance().getSongPlayer().getTriggerJobs().schedulePeriodicJop(0, Integer.MAX_VALUE,
+                        2, MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 4,
+                                MidiOrganizer.VELOCITY_FULL));
             }
         });
 
@@ -114,6 +116,9 @@ public class Library {
     public Gig createGig() {
         Gig gig = new Gig();
         gigList.add(gig);
+        if (SongCenterController.getInstance() != null) {
+            SongCenterController.getInstance().getGigs().add(gig);
+        }
         return gig;
     }
 

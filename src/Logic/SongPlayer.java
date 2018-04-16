@@ -3,6 +3,8 @@ package Logic;
 import Data.BeatStamp;
 import Data.Song;
 import GUI.SongPlayerController;
+import Logic.tempo.LiveTimeCode;
+import Logic.tempo.TempoRecognition;
 import Midi.MidiOrganizer;
 import Midi.MixTrackController;
 
@@ -20,21 +22,21 @@ public class SongPlayer {
         timeCode = new LiveTimeCode(currentSong);
         triggerJobs = new TriggerJobs(timeCode);
 
-        MidiOrganizer midiOrganizer = PlayLights.getPlayLights().getMidiOrganizer();
+        MidiOrganizer midiOrganizer = PlayLights.getInstance().getMidiOrganizer();
         midiOrganizer.sendMidiMessage(currentSong.getStartUpMessage(), midiOrganizer.getMpcDeviceConnector());
 
 
-        PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().prepareSong(currentSong);
+        PlayLights.getInstance().getMidiOrganizer().getMixTrackController().prepareSong(currentSong);
 
         // TODO: This not the final implementation
-        if (SongPlayerController.getSongPlayerController() != null) {
+        if (SongPlayerController.getInstance() != null) {
 
-            SongPlayerController.getSongPlayerController().prepare(this, createSongEndRunnable());
+            SongPlayerController.getInstance().prepare(this, createSongEndRunnable());
         } else {
             new IllegalStateException("Can't prepare SongPlayerController: It is not instanced yet. " +
                     "Check your implementation! Is the the controller class set in the fxml file?").printStackTrace();
         }
-        PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().updateActiveBank(MixTrackController.PAD.PAD_0X1, currentSong);
+        PlayLights.getInstance().getMidiOrganizer().getMixTrackController().updateActiveBank(MixTrackController.PAD.PAD_0X1, currentSong);
     }
 
     /**
@@ -56,15 +58,15 @@ public class SongPlayer {
         Song.PadAction padAction;
         if (MixTrackController.padIsBankRoot(pad)) {
             padAction = currentSong.getPadActions().get(pad)[0];
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().updateActiveBank(pad, currentSong);
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().updateActiveBank(pad, currentSong);
         } else {
-            padAction = currentSong.getPadActions().get(pad)[PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().getActiveBank()];
+            padAction = currentSong.getPadActions().get(pad)[PlayLights.getInstance().getMidiOrganizer().getMixTrackController().getActiveBank()];
         }
 
         if (padAction == null) {
             if (PlayLights.verbose) {
                 System.out.println("Pad" + pad + "has no associated action in the active bank: "
-                        + PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().getActiveBank());
+                        + PlayLights.getInstance().getMidiOrganizer().getMixTrackController().getActiveBank());
             }
             return;
         }
@@ -78,11 +80,11 @@ public class SongPlayer {
             if (!padUserEvents.isEmpty()) {
                 // set the event time of the first event of the starting pad action as the starting time of the time code
                 timeCode.start(padUserEvents.get(0).getEventTime());
-                SongPlayerController.getSongPlayerController().startAnimation();
+                SongPlayerController.getInstance().startAnimation();
                 // if LED is blinking, stop that first
 
-                PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS);
-                PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.PLAY_B_LED_ADDRESS, true);
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS);
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.PLAY_B_LED_ADDRESS, true);
                 padAction.getAction().run();
                 return; // Always return here?
             } else if (PlayLights.verbose) {
@@ -100,12 +102,12 @@ public class SongPlayer {
 
         if (timeCode.isRunning() && currentSong.calcBeatDistance(currentSong.getLastBeat(), timeCode.calcCurrentBeatPos()) >= 0) {
             // pad was pressed while the animation already finished (but the time code kept going)
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.CUE_B_LED_ADDRESS);
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.CUE_B_LED_ADDRESS);
         }
 
         timeCode.syncNow(currentSong.getClosestEventOfPadAction(padAction, timeCode.calcCurrentBeatPos()).getEventTime());
-        if (!SongPlayerController.getSongPlayerController().animationIsRunning()) {
-            SongPlayerController.getSongPlayerController().startAnimation();
+        if (!SongPlayerController.getInstance().animationIsRunning()) {
+            SongPlayerController.getInstance().startAnimation();
         }
     }
 
@@ -114,30 +116,30 @@ public class SongPlayer {
             if (timeCode.isRunning()) {
                 //the song is running after the last beat of the song
                 timeCode.stop();
-                PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().startBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS, 1000);
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackController().startBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS, 1000);
             } else {
                 //the song is stopped after the last beat of the song
                 timeCode.start(timeCode.calcCurrentBeatPos());
-                PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS);
-                PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.PLAY_B_LED_ADDRESS, true);
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS);
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.PLAY_B_LED_ADDRESS, true);
             }
             return;
         }
 
         if (timeCode.isRunning()) {
             timeCode.stop();
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().startBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS, 1000);
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, true);
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().startBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS, 1000);
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, true);
         } else {
             if (timeCode.atFirstBeat()) {
                 timeCode.start(BeatStamp.FIRST_BEAT);
             } else {
                 timeCode.start(timeCode.calcCurrentBeatPos());
             }
-            SongPlayerController.getSongPlayerController().startAnimation();
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS);
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.PLAY_B_LED_ADDRESS, true);
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, false);
+            SongPlayerController.getInstance().startAnimation();
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS);
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.PLAY_B_LED_ADDRESS, true);
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, false);
         }
     }
 
@@ -146,21 +148,21 @@ public class SongPlayer {
                 && currentSong.calcBeatDistance(currentSong.getLastBeat(), timeCode.calcCurrentBeatPos()) >= 0)) {
 
             //song is stopped not at the beginning of the song or the song is running after the last beat of the song
-            MidiOrganizer mo = PlayLights.getPlayLights().getMidiOrganizer();
+            MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
             mo.sendMidiMessage(currentSong.getStartUpMessage(), mo.getMpcDeviceConnector());
 
             timeCode.reset();
-            SongPlayerController.getSongPlayerController().resetAnimationPosition();
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.CUE_B_LED_ADDRESS);
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, false);
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().startBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS, 1500);
+            SongPlayerController.getInstance().resetAnimationPosition();
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.CUE_B_LED_ADDRESS);
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, false);
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().startBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS, 1500);
         }
     }
 
     public Runnable createSongEndRunnable() {
         return () -> {
-            SongPlayerController.getSongPlayerController().stopAnimation();
-            PlayLights.getPlayLights().getMidiOrganizer().getMixTrackController().startBlinkLed(MixTrackController.CUE_B_LED_ADDRESS, 1500);
+            SongPlayerController.getInstance().stopAnimation();
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().startBlinkLed(MixTrackController.CUE_B_LED_ADDRESS, 1500);
             //TODO: Inform User that song has ended
         };
     }

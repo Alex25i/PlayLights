@@ -7,6 +7,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -23,10 +24,10 @@ public class PlayLights extends Application {
     public PlayLights() {
         verbose = true;
         playLights = this;
-        //midiOrganizer = new MidiOrganizer();
+        midiOrganizer = new MidiOrganizer();
         library = new Library();
-        //midiOrganizer.getMixTrackController().blackoutStartLEDs();
-        playLights.createTestGigs();
+        midiOrganizer.getMixTrackController().blackoutStartLEDs();
+        createTestGigs();
     }
 
     /**
@@ -48,35 +49,36 @@ public class PlayLights extends Application {
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
 
-        String resourcePath = "../GUI/SongCenter.fxml";
+        String resourcePath = "../GUI/songCenter.fxml";
         URL location = getClass().getResource(resourcePath);
         FXMLLoader fxmlLoader = new FXMLLoader(location);
 
         Scene scene = new Scene(fxmlLoader.load(), 576, 324);
 
         primaryStage.setScene(scene);
-        // primaryStage.initStyle(StageStyle.UNDECORATED);
+        primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.show();
 
         // TODO: Move this to an appropriate location
+        //songPlayer = new SongPlayer(PlayLights.getInstance().getLibrary().getSongList().get(0));
 
-        //songPlayer = new SongPlayer(PlayLights.getPlayLights().getLibrary().getSongList().get(0));
+
     }
 
     private void createTestGigs() {
         Gig gig = library.createGig();
-        gig.setDate(LocalDate.of(1018, 3, 11));
+        gig.setDate(LocalDate.of(2018, 3, 11));
         gig.setLocation("Musikschule");
         gig = library.createGig();
-        gig.setDate(LocalDate.of(1018, 7, 3));
-        gig.setLocation("Musikschule");
+        gig.setDate(LocalDate.of(2018, 7, 1));
+        gig.setLocation("Vaihingen");
     }
 
     public Stage getPrimaryStage() {
         return primaryStage;
     }
 
-    public static PlayLights getPlayLights() {
+    public static PlayLights getInstance() {
         return playLights;
     }
 

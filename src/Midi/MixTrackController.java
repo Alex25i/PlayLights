@@ -12,7 +12,7 @@ import static Midi.MixTrackController.PAD.*;
 
 public class MixTrackController {
 
-    public enum PAD {PAD_0X0, PAD_1X0, PAD_2X0, PAD_3X0, PAD_4X0, PAD_5X0, PAD_6X0, PAD_7X0, PAD_0X1, PAD_1X1, PAD_2X1, PAD_3X1, PAD_4X1, PAD_5X1, PAD_6X1, PAD_7X1,}
+    public enum PAD {PAD_0X0, PAD_1X0, PAD_2X0, PAD_3X0, PAD_4X0, PAD_5X0, PAD_6X0, PAD_7X0, PAD_0X1, PAD_1X1, PAD_2X1, PAD_3X1, PAD_4X1, PAD_5X1, PAD_6X1, PAD_7X1}
 
     public enum BLINK_DURATION {BARS4, BARS2, BARS1}
 
@@ -91,8 +91,10 @@ public class MixTrackController {
     public static final byte LOAD_A_ADDRESS = 0x4b;
     public static final byte CUE_HEADPHONE_A_ADDRESS = 0x51;
 
-    public static final byte BROWSE_PUSH_NAVIGATION_ADDRESS = 0x76;
+
+    public static final byte BROWSE_PUSH_ADDRESS = 0x76;
     public static final byte BROWSE_BACK_ADDRESS = 0x77;
+    public static final byte BROWSE_TURN_ADDRESS = 0x1a;
 
     public static final byte SHIFT_B_ADDRESS = 0x62;
     public static final byte LOAD_B_ADDRESS = 0x34;
@@ -227,14 +229,14 @@ public class MixTrackController {
 //            ButtonType buttonTypeReconnect = new ButtonType("Reconnect");
 //            alert.getButtonTypes().setAll(buttonTypeReconnect);
 //            alert.showAndWait();
-//            PlayLights.getPlayLights().getMidiOrganizer().setMixTrackDeviceConnector(new MidiDeviceConnector("Mixtrack"));
+//            PlayLights.getInstance().getMidiOrganizer().setMixTrackDeviceConnector(new MidiDeviceConnector("Mixtrack"));
 //            // reconnected now, otherwise application was closed in MidiDeviceConnector.searchForDevice(String)
 //            blackoutStartLEDs();
 //            //TODO: Illuminate right LEDs
-//            if (PlayLights.getPlayLights().getSongPlayer() != null) {
+//            if (PlayLights.getInstance().getSongPlayer() != null) {
 //                // there is a song active
-//                prepareSong(PlayLights.getPlayLights().getSongPlayer().getCurrentSong());
-//                //SongPlayerController.getSongPlayerController().setBlackBackgroundColor();
+//                prepareSong(PlayLights.getInstance().getSongPlayer().getCurrentSong());
+//                //SongPlayerController.getInstance().setBlackBackgroundColor();
 //            }
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error: Connection Lost");
@@ -297,8 +299,8 @@ public class MixTrackController {
         } else {
             midiMessage[2] = MidiOrganizer.VELOCITY_NONE;
         }
-        PlayLights.getPlayLights().getMidiOrganizer().sendMidiMessage(midiMessage[0], midiMessage[1], midiMessage[2],
-                PlayLights.getPlayLights().getMidiOrganizer().getMixTrackDeviceConnector());
+        PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(midiMessage[0], midiMessage[1], midiMessage[2],
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackDeviceConnector());
     }
 
     /**

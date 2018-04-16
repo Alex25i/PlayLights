@@ -1,7 +1,8 @@
-package Logic;
+package Logic.tempo;
 
 import Data.BeatStamp;
 import Data.Song;
+import Logic.PlayLights;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,7 @@ public class LiveTimeCode {
     }
 
     /**
-     * @return the position of the {@link LiveTimeCode} as a {@link BeatStamp}
+     * @return the position of the current {@link LiveTimeCode} as a {@link BeatStamp}
      */
     public BeatStamp calcCurrentBeatPos() {
         // should also return a valid result if the timeCode is not running
@@ -94,6 +95,11 @@ public class LiveTimeCode {
         return new BeatStamp(currentPosBar, currentPosBeat);
     }
 
+    public BeatStamp calcNearestBeatPos(long time) {
+        //TODO: Implement Method
+        return null;
+    }
+
     /**
      * syncs the {@link LiveTimeCode} with the current system time and the given {@link BeatStamp}
      *
@@ -103,6 +109,17 @@ public class LiveTimeCode {
         reverenceTime = System.currentTimeMillis();
         reverencePosition = beatStamp;
     }
+
+    /**
+     * syncs the {@link LiveTimeCode} with the current system time and the given {@link BeatStamp}
+     *
+     * @param beatStamp song position the {@link LiveTimeCode} gets synced with99
+     */
+    public void syncAt(long time, BeatStamp beatStamp) {
+        reverenceTime = time;
+        reverencePosition = beatStamp;
+    }
+
 
     /**
      * run given @{@link Runnable} at the time of given @{@link BeatStamp}

@@ -1,11 +1,11 @@
-package Logic;
+package Logic.tempo;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 
 public class TempoRecognition {
 
-    private static final double allowedDeviationFactor = 0.4;
+    private static final double ALLOWED_DEVIATION_FACTOR = 0.4;
     private ArrayList<Long> tapTimings;
     private int expectedTempo;
 
@@ -45,7 +45,7 @@ public class TempoRecognition {
         final int expectedMillsPerBeat = (int) (1000 / ((double) expectedTempo / 60));
         for (Long deltaTap : deltaTaps) {
             double actualDeviationFactor = Math.abs(expectedMillsPerBeat - deltaTap) / (double) expectedMillsPerBeat;
-            if (actualDeviationFactor <= allowedDeviationFactor) {
+            if (actualDeviationFactor <= ALLOWED_DEVIATION_FACTOR) {
                 deltaTapsValidated.add(deltaTap);
             }
         }

@@ -1,5 +1,6 @@
 package Midi;
 
+import GUI.SongCenterController;
 import Logic.PlayLights;
 
 import javax.sound.midi.InvalidMidiDataException;
@@ -53,26 +54,34 @@ public class MidiOrganizer {
         if (sourceName.toLowerCase().contains("Mixtrack".toLowerCase())) {
             // midi message from Mixtrack
 
-            if (PlayLights.getPlayLights().getSongPlayer() != null) {
+            if (PlayLights.getInstance().getSongPlayer() != null) {
                 // there is a song loaded or playing currently
                 // check if a MixTrackController.PAD was pressed
                 MixTrackController.PAD pressedPad = MixTrackController.getPadFromAddress((byte) midiNode);
                 if (midiType == MESSAGE_TYPE_NODE_ON && pressedPad != null && midiVelocity == VELOCITY_FULL) {
                     // the midi message was caused by pressing the pad pressedPad
-                    PlayLights.getPlayLights().getSongPlayer().padPressed(pressedPad);
+                    PlayLights.getInstance().getSongPlayer().padPressed(pressedPad);
                 } else if (midiType == MESSAGE_TYPE_NODE_ON && midiNode == MixTrackController.PLAY_B_ADDRESS && midiVelocity == VELOCITY_FULL) {
-                    PlayLights.getPlayLights().getSongPlayer().playPausePressed();
+                    PlayLights.getInstance().getSongPlayer().playPausePressed();
                 } else if (midiType == MESSAGE_TYPE_NODE_ON && midiNode == MixTrackController.CUE_B_LED_ADDRESS && midiVelocity == VELOCITY_FULL) {
-                    PlayLights.getPlayLights().getSongPlayer().resetPressed();
+                    PlayLights.getInstance().getSongPlayer().resetPressed();
                 }
 
-            } else {
-                //there is NO song loaded or playing currently
+            } else if (SongCenterController.getInstance() != null) {
+                // there is songCenter currently displayed, but there is NO song loaded currently
+                if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.BROWSE_TURN_ADDRESS && midiVelocity == VELOCITY_FULL) {
+                    SongCenterController.getInstance().selectionLeft();
+                } else {
+                    // if it is not left, is it always right
+                    SongCenterController.getInstance().selectionRight();
+                }
+
             }
 
         } else if (sourceName.contains("LoopBe")) {
 
         }
+
     }
 
     public void sendMidiMessage(int messageType, int note, int velocity, MidiDeviceConnector deviceConnector) {

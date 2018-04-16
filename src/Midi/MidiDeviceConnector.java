@@ -104,7 +104,7 @@ public class MidiDeviceConnector {
             @Override
             public void send(MidiMessage message, long timeStamp) {
                 if (open) {
-                    PlayLights.getPlayLights().getMidiOrganizer().processMidiMessage(message, timeStamp, deviceName);
+                    PlayLights.getInstance().getMidiOrganizer().processMidiMessage(message, timeStamp, deviceName);
                 }
             }
 

@@ -1,5 +1,7 @@
 package Logic;
 
+import Data.BeatStamp;
+import Logic.tempo.LiveTimeCode;
 import Midi.MidiOrganizer;
 import Midi.MixTrackController;
 
@@ -44,7 +46,7 @@ public class TriggerJobs {
             @Override
             public void run() {
                 if (iteration <= iterations) {
-                    MidiOrganizer mo = PlayLights.getPlayLights().getMidiOrganizer();
+                    MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
                     mo.sendMidiMessage(midiMessage, mo.getMpcDeviceConnector());
                 } else {
                     timer.cancel();
@@ -58,6 +60,21 @@ public class TriggerJobs {
         long timeInterval = (long) (millsPerBeat * interval);
         timer.schedule(timerTask, timeStartDelay, timeInterval);
         jobs.add(timer);
+    }
+
+    /**
+     * schedule a Periodic job which is played until it is interrupted explicitly (no iteration counter)
+     *
+     * @param startBeat   beat nr form a bar to start the job
+     * @param interval    the interval between two iterations in beats, can also be a fraction of a beat
+     * @param midiMessage the midi message that will be triggered
+     */
+    //TODO: Only needed if there is a tap sync feature
+    public void scheduleInfinitePeriodicJop(final int startBeat, final double interval, ShortMessage midiMessage) {
+        BeatStamp beatStamp = timeCode.calcCurrentBeatPos(); // beat pos (last beat played)
+
+        // check if
+
     }
 
     public void stopAllTimer() {

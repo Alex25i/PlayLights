@@ -14,23 +14,29 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
 public class SongCenterController {
-    private SongCenterController songCenterController;
+    public enum VIEW_MODES {GIG, SET, SONG}
+
+    private static SongCenterController songCenterController;
 
     @FXML
     private AnchorPane tableContainer;
 
+    private VIEW_MODES viewMode;
     private TableView<Gig> gigTable;
+    private TableView<SetList> setsList;
     private TableView<Song> songTable;
+    private ObservableList<Gig> gigs;
 
     @FXML
     public void initialize() {
+        songCenterController = this;
+        gigs = FXCollections.observableArrayList();
         setupTableGigs();
-        tableContainer.getChildren().add(gigTable);
+        showTable(gigTable);
     }
 
     private void setupTableGigs() {
-        ObservableList<Gig> gigs = FXCollections.observableArrayList();
-        gigs.addAll(PlayLights.getPlayLights().getLibrary().getGigList());
+        gigs.addAll(PlayLights.getInstance().getLibrary().getGigList());
 
         gigTable = new TableView<>();
         gigTable.setItems(gigs);
@@ -45,6 +51,17 @@ public class SongCenterController {
 
         gigTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         gigTable.setEditable(false);
+        gigTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        gigTable.prefWidthProperty().bind(tableContainer.widthProperty());
+
+        dateColumn.prefWidthProperty().bind(gigTable.widthProperty().multiply(0.3));
+        locationColumn.prefWidthProperty().bind(gigTable.widthProperty().multiply(0.7));
+
+        dateColumn.setResizable(false);
+        locationColumn.setResizable(false);
+
+        dateColumn.setReorderable(false);
+        locationColumn.setReorderable(false);
 
         if (!gigs.isEmpty()) {
             gigTable.getSelectionModel().select(0, dateColumn);
@@ -52,6 +69,8 @@ public class SongCenterController {
     }
 
     private void setupTableSongs(Gig gig) {
+        //TODO: Change Implementation to songs of a set, only
+
         ObservableList<Song> songs = FXCollections.observableArrayList();
         for (SetList set : gig.getSets()) {
             songs.addAll(set.getSongs());
@@ -71,11 +90,73 @@ public class SongCenterController {
         songTable.setEditable(false);
 
         if (!songs.isEmpty()) {
-            songTable.getSelectionModel().select(0, positionColumn);
+            songTable.getSelectionModel().select(0);
         }
     }
 
-    public SongCenterController getSongCenterController() {
+    /**
+     * called when the MixTrack selection wheel was moved to the left
+     */
+    public void selectionLeft() {
+        selection(1);
+    }
+
+
+    /**
+     * called when the MixTrack selection wheel was moved to the right
+     */
+    public void selectionRight() {
+        selection(2);
+    }
+
+    private void selection(int action) {
+        if (tableContainer.getChildren().isEmpty()) {
+            // there is no tabele displayed currently
+            new IllegalStateException("There is no table displayed at the SongCenter, currently. Check implementation").printStackTrace();
+            return;
+        }
+        switch (viewMode) {
+            case GIG: {
+                int currentSelectedIndex = gigTable.getSelectionModel().getSelectedIndex();
+                if (action == 1) {
+                    // left action
+
+                    if (currentSelectedIndex > 0) {
+                        // it is not the last element which is currently selected
+                        gigTable.getSelectionModel().clearAndSelect(currentSelectedIndex - 1);
+                    }
+                } else if (action == 2) {
+                    // right action
+                    if (currentSelectedIndex < gigTable.getItems().size() - 1) {
+                        // it is not the last element which is currently selected
+                        gigTable.getSelectionModel().clearAndSelect(currentSelectedIndex + 1);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    private void showTable(TableView table) {
+        if (tableContainer.getChildren().isEmpty()) {
+            tableContainer.getChildren().add(table);
+        } else {
+            tableContainer.getChildren().set(0, table);
+        }
+        if (table == gigTable) {
+            viewMode = VIEW_MODES.GIG;
+        } else if (table == setsList) {
+            viewMode = VIEW_MODES.SET;
+        } else if (table == songTable) {
+            viewMode = VIEW_MODES.SONG;
+        }
+    }
+
+    public static SongCenterController getInstance() {
         return songCenterController;
+    }
+
+    public ObservableList<Gig> getGigs() {
+        return gigs;
     }
 }
