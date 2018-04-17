@@ -51,7 +51,7 @@ public class SongPlayer {
 
         if (!currentSong.getPadActions().containsKey(pad)) {
             if (PlayLights.verbose) {
-                System.out.println("Pad" + pad + "has no associated action in this song: " + currentSong.getName());
+                System.out.println("Pad" + pad + " has no associated action in this song: " + currentSong.getName());
             }
             return;
         }

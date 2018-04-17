@@ -6,6 +6,7 @@ import Logic.SongPlayer;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.SubScene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -29,6 +30,9 @@ public class SongPlayerController {
     @FXML
     private Pane rootPane;
 
+    @FXML
+    public SubScene mainScene;
+
     private Group songGrid;
     private Line positionIndicator;
 
@@ -42,7 +46,7 @@ public class SongPlayerController {
     public void prepare(SongPlayer songPlayer, Runnable songEnd) {
         player = songPlayer;
 
-        rootPane.setStyle("-fx-background-color: #000;");
+
         drawSongGrid();
         drawUserEventMarker();
         drawStaticOverlay();
@@ -52,7 +56,7 @@ public class SongPlayerController {
 
     private void prepareAnimation(Runnable songEnd) {
         songGridAnimation = new AnimationTimer() {
-            final int songEndPos = (int) (-player.getCurrentSong().calcTotalBeatCount() * zoomFactor * 20 - 30);
+            final int songEndPos = (int) (-player.getCurrentSong().calcTotalBeatCount() * zoomFactor * 20 - 35);
 
             @Override
             public void handle(long now) {
@@ -142,7 +146,7 @@ public class SongPlayerController {
     private void drawSongGrid() {
         final int xStartOffset = (int) rootPane.getWidth() / 2;
 
-        for (int beat = 0; beat < player.getCurrentSong().calcTotalBeatCount(); beat++) {
+        for (int beat = 0; beat <= player.getCurrentSong().calcTotalBeatCount(); beat++) {
             Line gridLine = new Line();
             int xCoordinates = (int) (beat * zoomFactor * 20);
             if (beat % player.getCurrentSong().getBeatsPerBar() == 0) {

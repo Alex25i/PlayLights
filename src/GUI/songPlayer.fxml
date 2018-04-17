@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.SubScene?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.Region?>
-
-
+<?import javafx.scene.SubScene?>
 <Pane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-      prefHeight="324.0" prefWidth="576.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="GUI.SongPlayerController">
+      style="-fx-background-color: #000000;" xmlns="http://javafx.com/javafx/8.0.111"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.SongPlayerController">
     <children>
-        <SubScene fx:id="mainScene" height="324.0" width="576.0">
+        <SubScene fx:id="mainScene">
             <root>
                 <Region/>
             </root>

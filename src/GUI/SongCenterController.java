@@ -4,6 +4,7 @@ import Data.Gig;
 import Data.SetList;
 import Data.Song;
 import Logic.PlayLights;
+import Midi.MixTrackController;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -89,7 +90,7 @@ public class SongCenterController {
         songTable.getColumns().add(interpretColumn);
 
         TableColumn<TableSong, Integer> songLengthColumn = new TableColumn<>("Length [bars]");
-        songLengthColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().song.getLastBeat().getBarNr() + 1));
+        songLengthColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().song.getLastBeat().getBarNr()));
         songTable.getColumns().add(songLengthColumn);
 
         TableColumn<TableSong, Integer> tempoColumn = new TableColumn<>("Tempo");
@@ -113,7 +114,6 @@ public class SongCenterController {
         songLengthColumn.setMaxWidth(100);
         tempoColumn.setMinWidth(50);
         tempoColumn.setMaxWidth(50);
-
 
 
         setNrColumn.setReorderable(false);
@@ -236,7 +236,7 @@ public class SongCenterController {
                         // no list item selected
                         break;
                     }
-                    //TODO: Load song
+                    PlayLights.getInstance().loadSongPlayer(songTable.getSelectionModel().getSelectedItem().song);
                 } else if (action == 4) {
                     showTable(gigTable);
                 }
@@ -254,8 +254,12 @@ public class SongCenterController {
             }
             if (table == gigTable) {
                 viewMode = VIEW_MODES.GIG;
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FOLDER_LED_ADDRESS, true);
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FILE_LED_ADDRESS, false);
             } else if (table == songTable) {
                 viewMode = VIEW_MODES.SONG;
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FOLDER_LED_ADDRESS, false);
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FILE_LED_ADDRESS, true);
             }
         });
     }

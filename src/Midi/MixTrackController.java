@@ -12,7 +12,10 @@ import static Midi.MixTrackController.PAD.*;
 
 public class MixTrackController {
 
-    public enum PAD {PAD_0X0, PAD_1X0, PAD_2X0, PAD_3X0, PAD_4X0, PAD_5X0, PAD_6X0, PAD_7X0, PAD_0X1, PAD_1X1, PAD_2X1, PAD_3X1, PAD_4X1, PAD_5X1, PAD_6X1, PAD_7X1}
+    public enum PAD {
+        PAD_0X0, PAD_1X0, PAD_2X0, PAD_3X0, PAD_4X0, PAD_5X0, PAD_6X0, PAD_7X0, PAD_0X1, PAD_1X1, PAD_2X1,
+        PAD_3X1, PAD_4X1, PAD_5X1, PAD_6X1, PAD_7X1
+    }
 
     public enum BLINK_DURATION {BARS4, BARS2, BARS1}
 
@@ -263,7 +266,7 @@ public class MixTrackController {
         blinkingLEDs.put(LED_ADDRESS, new Timer("Blink of " + LED_ADDRESS));
         // use boolean inside a List so that the list object van be final
         TimerTask blink = new TimerTask() {
-            boolean on = false;
+            boolean on = true;
 
             @Override
             public void run() {
@@ -379,17 +382,19 @@ public class MixTrackController {
     }
 
     /**
-     * turns of all default illuminated LEDs of the controller
+     * turns of all  illuminated LEDs of the controller
      */
     public void blackoutStartLEDs() {
         setLedIllumination(SYNC_A_LED_ADDRESS, false);
         setLedIllumination(CUE_A_LED_ADDRESS, false);
         setLedIllumination(PLAY_A_LED_ADDRESS, false);
         setLedIllumination(STUTTER_A_LED_ADDRESS, false);
+        setLedIllumination(SCRATCH_A_LED_ADDRESS, false);
         setLedIllumination(SYNC_B_LED_ADDRESS, false);
         setLedIllumination(CUE_B_LED_ADDRESS, false);
         setLedIllumination(PLAY_B_LED_ADDRESS, false);
         setLedIllumination(STUTTER_B_LED_ADDRESS, false);
+        setLedIllumination(SCRATCH_B_LED_ADDRESS, false);
 
         setLedIllumination(LOOP_MODE_A_LED, false);
         setLedIllumination(SAMPLE_MODE_A_LED, false);
@@ -397,6 +402,14 @@ public class MixTrackController {
         setLedIllumination(LOOP_MODE_B_LED, false);
         setLedIllumination(SAMPLE_MODE_B_LED, false);
         setLedIllumination(CUE_MODE_B_LED, false);
+
+        // torn of all pad leds
+        for (PAD pad : PAD.values()) {
+            for (Byte address : getPadLedAddresses(pad)) {
+                setLedIllumination(address, false);
+            }
+        }
+
 
     }
 

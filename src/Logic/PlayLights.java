@@ -3,13 +3,17 @@ package Logic;
 import Data.Gig;
 import Data.Library;
 import Data.SetList;
+import Data.Song;
 import Midi.MidiOrganizer;
+import Midi.MixTrackController;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 
@@ -49,15 +53,38 @@ public class PlayLights extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
+        this.primaryStage.initStyle(StageStyle.UNDECORATED);
+        loadSongCenter();
+        //loadSongPlayer(library.getSongList().get(0));
+    }
 
-        String resourcePath = "../GUI/songCenter.fxml";
+    public void loadSongPlayer(Song song) {
+        Platform.runLater(() -> {
+            String resourcePath = "../GUI/songPlayer.fxml";
+            loadScene(resourcePath);
+            songPlayer = new SongPlayer(song);
+        });
+        getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FOLDER_LED_ADDRESS, false);
+        getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FILE_LED_ADDRESS, false);
+    }
+
+    public void loadSongCenter() {
+        Platform.runLater(() -> {
+            String resourcePath = "../GUI/songCenter.fxml";
+            loadScene(resourcePath);
+        });
+    }
+
+    private void loadScene(String resourcePath) {
         URL location = getClass().getResource(resourcePath);
         FXMLLoader fxmlLoader = new FXMLLoader(location);
-
-        Scene scene = new Scene(fxmlLoader.load(), 576, 324);
-
+        Scene scene = null;
+        try {
+            scene = new Scene(fxmlLoader.load(), 576, 324);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         primaryStage.setScene(scene);
-        primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.show();
     }
 
