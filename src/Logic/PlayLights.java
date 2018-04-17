@@ -8,10 +8,12 @@ import Midi.MidiOrganizer;
 import Midi.MixTrackController;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.net.URL;
@@ -55,6 +57,14 @@ public class PlayLights extends Application {
         this.primaryStage = primaryStage;
         this.primaryStage.initStyle(StageStyle.UNDECORATED);
         loadSongCenter();
+
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent t) {
+                Platform.exit();
+                System.exit(0);
+            }
+        });
         //loadSongPlayer(library.getSongList().get(0));
     }
 

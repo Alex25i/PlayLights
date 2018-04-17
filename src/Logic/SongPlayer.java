@@ -103,6 +103,7 @@ public class SongPlayer {
         if (timeCode.isRunning() && currentSong.calcBeatDistance(currentSong.getLastBeat(), timeCode.calcCurrentBeatPos()) >= 0) {
             // pad was pressed while the animation already finished (but the time code kept going)
             PlayLights.getInstance().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.CUE_B_LED_ADDRESS);
+            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, false);
         }
 
         timeCode.syncNow(currentSong.getClosestEventOfPadAction(padAction, timeCode.calcCurrentBeatPos()).getEventTime());
@@ -116,6 +117,7 @@ public class SongPlayer {
             if (timeCode.isRunning()) {
                 //the song is running after the last beat of the song
                 timeCode.stop();
+                triggerJobs.stopAllTimer();
                 PlayLights.getInstance().getMidiOrganizer().getMixTrackController().startBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS, 1000);
             } else {
                 //the song is stopped after the last beat of the song
@@ -128,6 +130,7 @@ public class SongPlayer {
 
         if (timeCode.isRunning()) {
             timeCode.stop();
+            triggerJobs.stopAllTimer();
             PlayLights.getInstance().getMidiOrganizer().getMixTrackController().startBlinkLed(MixTrackController.PLAY_B_LED_ADDRESS, 1000);
             PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, true);
         } else {
@@ -152,6 +155,7 @@ public class SongPlayer {
             mo.sendMidiMessage(currentSong.getStartUpMessage(), mo.getMpcDeviceConnector());
 
             timeCode.reset();
+            triggerJobs.stopAllTimer();
             SongPlayerController.getInstance().resetAnimationPosition();
             PlayLights.getInstance().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.CUE_B_LED_ADDRESS);
             PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, false);

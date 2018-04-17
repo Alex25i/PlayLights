@@ -279,7 +279,7 @@ public class MixTrackController {
 
     public void stopBlinkLed(final byte LED_ADDRESS) {
         if (blinkingLEDs.containsKey(LED_ADDRESS)) {
-            // remove timer from map an cancel it task
+            // remove timer from map and cancel its task
             blinkingLEDs.remove(LED_ADDRESS).cancel();
         }
     }
