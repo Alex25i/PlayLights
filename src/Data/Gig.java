@@ -13,6 +13,7 @@ public class Gig {
 
     public Gig() {
         sets = new ArrayList<>();
+        location = "Unknown";
     }
 
     public SetList createSet() {

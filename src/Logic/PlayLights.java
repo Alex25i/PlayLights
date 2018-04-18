@@ -8,12 +8,12 @@ import Midi.MidiOrganizer;
 import Midi.MixTrackController;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.net.URL;
@@ -58,12 +58,9 @@ public class PlayLights extends Application {
         this.primaryStage.initStyle(StageStyle.UNDECORATED);
         loadSongCenter();
 
-        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent t) {
-                Platform.exit();
-                System.exit(0);
-            }
+        primaryStage.setOnCloseRequest(t -> {
+            Platform.exit();
+            System.exit(0);
         });
         //loadSongPlayer(library.getSongList().get(0));
     }
@@ -90,12 +87,20 @@ public class PlayLights extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(location);
         Scene scene = null;
         try {
-            scene = new Scene(fxmlLoader.load(), 576, 324);
+            scene = new Scene(fxmlLoader.load(), 576, 265);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+        double x = bounds.getMaxX() - primaryStage.getWidth() - 117;
+        double y = bounds.getMaxY() - primaryStage.getHeight() - 138;
+
+        primaryStage.setX(x);
+        primaryStage.setY(y);
     }
 
     private void createTestData() {
@@ -108,6 +113,7 @@ public class PlayLights extends Application {
         gig = library.createGig("Musikschule", LocalDate.of(2018, 3, 11));
         set = gig.createSet();
         set.addSong(library.getSongList().get(0));
+
     }
 
     public Stage getPrimaryStage() {

@@ -47,7 +47,6 @@ public class SongPlayerController {
     private Label nextUserActionLb;
 
     private Group songGrid;
-    private Line positionIndicator;
 
 
     @FXML
@@ -151,10 +150,17 @@ public class SongPlayerController {
 
     private void drawStaticOverlay() {
         int midLinePositionX = (int) (rootPane.getWidth() / 2);
-        positionIndicator = new Line(midLinePositionX, 0, midLinePositionX, 200);
+
+        Line positionIndicator = new Line(midLinePositionX, 0, midLinePositionX, 200);
         positionIndicator.setStroke(Color.RED);
         positionIndicator.setStrokeWidth(2);
         rootPane.getChildren().add(positionIndicator);
+
+        Line gridBottom = new Line(0, 200, rootPane.getWidth(), 200);
+        gridBottom.setStroke(new Color(.5, .5, .5, 1));
+        gridBottom.setStrokeWidth(2);
+        rootPane.getChildren().add(gridBottom);
+
     }
 
     private void drawSongGrid() {
@@ -247,6 +253,8 @@ public class SongPlayerController {
 
     private void fillSongDescription() {
         songNameLb.setText(player.getCurrentSong().getInterpret() + " - " + player.getCurrentSong().getName());
+        songNrLb.setText(String.valueOf(player.getSongPos() + 1));
+        songLengthLb.setText(String.valueOf(player.getCurrentSong().getLastBeat().getBarNr()) + " bars");
     }
 
     /**

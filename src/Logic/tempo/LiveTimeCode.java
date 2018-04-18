@@ -3,6 +3,7 @@ package Logic.tempo;
 import Data.BeatStamp;
 import Data.Song;
 import Logic.PlayLights;
+import javafx.application.Platform;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,8 @@ public class LiveTimeCode {
             throw new IllegalStateException("The tempo is not set or incorrect ");
         }
         syncNow(beatStamp);
+        Platform.runLater(() -> PlayLights.getInstance().getPrimaryStage().setAlwaysOnTop(true));
+
         //TODO: Timed-run the Song.userEvents
     }
 
@@ -51,6 +54,7 @@ public class LiveTimeCode {
             sleepingThread.interrupt();
         }
         sleepingThreads.clear();
+        Platform.runLater(() -> PlayLights.getInstance().getPrimaryStage().setAlwaysOnTop(false));
     }
 
     public boolean isRunning() {

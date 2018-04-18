@@ -15,6 +15,8 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.skin.TableViewSkin;
+import javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.layout.AnchorPane;
 
 public class SongCenterController {
@@ -59,16 +61,20 @@ public class SongCenterController {
         gigTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         gigTable.prefWidthProperty().bind(tableContainer.widthProperty());
 
+        dateColumn.setMinWidth(120);
+        dateColumn.setMaxWidth(120);
+
         dateColumn.prefWidthProperty().bind(gigTable.widthProperty().multiply(0.3));
         locationColumn.prefWidthProperty().bind(gigTable.widthProperty().multiply(0.7));
 
-        dateColumn.setResizable(false);
-        locationColumn.setResizable(false);
-
         dateColumn.setReorderable(false);
         locationColumn.setReorderable(false);
-
         gigTable.getSelectionModel().clearAndSelect(0);
+
+        AnchorPane.setTopAnchor(gigTable, 0.0);
+        AnchorPane.setLeftAnchor(gigTable, 0.0);
+        AnchorPane.setBottomAnchor(gigTable, 0.0);
+        AnchorPane.setRightAnchor(gigTable, 0.0);
     }
 
     private void setupTableSongs() {
@@ -124,6 +130,11 @@ public class SongCenterController {
         songLengthColumn.setReorderable(false);
         tempoColumn.setReorderable(false);
         setNrColumn.setReorderable(false);
+
+        AnchorPane.setTopAnchor(songTable, 0.0);
+        AnchorPane.setLeftAnchor(songTable, 0.0);
+        AnchorPane.setBottomAnchor(songTable, 0.0);
+        AnchorPane.setRightAnchor(songTable, 0.0);
     }
 
     private ObservableList<TableSong> generateSongPosition(Gig gig) {
@@ -192,6 +203,7 @@ public class SongCenterController {
                     if (currentSelectedIndex > 0) {
                         // it is not the last element which is currently selected
                         gigTable.getSelectionModel().clearAndSelect(currentSelectedIndex - 1);
+                        scrollIfNeeded(gigTable);
                     }
 
                 } else if (action == 2) {
@@ -199,6 +211,7 @@ public class SongCenterController {
                     if (currentSelectedIndex < gigTable.getItems().size() - 1) {
                         // it is not the last element which is currently selected
                         gigTable.getSelectionModel().clearAndSelect(currentSelectedIndex + 1);
+                        scrollIfNeeded(gigTable);
                     }
 
                 } else if (action == 3) {
@@ -221,6 +234,7 @@ public class SongCenterController {
                     if (currentSelectedIndex > 0) {
                         // it is not the last element which is currently selected
                         songTable.getSelectionModel().clearAndSelect(currentSelectedIndex - 1);
+                        scrollIfNeeded(songTable);
                     }
 
                 } else if (action == 2) {
@@ -228,6 +242,7 @@ public class SongCenterController {
                     if (currentSelectedIndex < songTable.getItems().size() - 1) {
                         // it is not the last element which is currently selected
                         songTable.getSelectionModel().clearAndSelect(currentSelectedIndex + 1);
+                        scrollIfNeeded(songTable);
                     }
 
                 } else if (action == 3) {
@@ -263,6 +278,43 @@ public class SongCenterController {
                 PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FILE_LED_ADDRESS, true);
             }
         });
+    }
+
+    private void scrollIfNeeded(TableView<?> t) {
+        Platform.runLater(() -> {
+            int selected = t.getSelectionModel().getSelectedIndex();
+            int first = 0;
+            int last = 0;
+            try {
+                TableViewSkin<?> ts = (TableViewSkin<?>) t.getSkin();
+                VirtualFlow<?> vf = (VirtualFlow<?>) ts.getChildren().get(1);
+
+                first = vf.getFirstVisibleCell().getIndex();
+
+                last = vf.getLastVisibleCell().getIndex();
+            } catch (Exception ex) {
+                new Exception("Error while scroll calculation", ex).printStackTrace();
+                // if exception occurs just scroll with naive algorithm (selected is on top of viewpoint)
+                t.scrollTo(selected);
+                return;
+            }
+            if (selected > last) {
+                // need to scroll down
+                if (first + 3 <= selected) {
+                    t.scrollTo(first + 3);
+                } else {
+                    t.scrollTo(selected);
+                }
+            } else if (selected < first) {
+                if (selected - 3 >= 0) {
+                    t.scrollTo(selected - 3);
+                } else {
+                    t.scrollTo(0);
+                }
+                //need to scroll up
+            }
+        });
+
     }
 
     public static SongCenterController getInstance() {

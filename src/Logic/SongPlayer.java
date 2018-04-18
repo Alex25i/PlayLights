@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class SongPlayer {
     private Song currentSong;
-    private Gig currentGig;
+    private Gig currentGig; // currently not used
     private int songPos; // position of song in the gig. Independent of sets.
     private LiveTimeCode timeCode;
     private TempoRecognition tempoRecognition; // currently not used
@@ -181,15 +181,23 @@ public class SongPlayer {
         return currentSong;
     }
 
+    public Gig getCurrentGig() {
+        return currentGig;
+    }
+
+    public int getSongPos() {
+        return songPos;
+    }
+
     public LiveTimeCode getTimeCode() {
         return timeCode;
     }
 
-    public TriggerJobs getTriggerJobs() {
-        return triggerJobs;
-    }
-
     public TempoRecognition getTempoRecognition() {
         return tempoRecognition;
+    }
+
+    public TriggerJobs getTriggerJobs() {
+        return triggerJobs;
     }
 }
