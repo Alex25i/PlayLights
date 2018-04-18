@@ -226,28 +226,51 @@ public class SongPlayerController {
             songGrid.getChildren().add(markerStand);
 
             //Sign of th marker
-            Rectangle markerSign = new Rectangle(pxPos - 25.5, 24.5, 26, 25);
+            Rectangle markerSign = new Rectangle();
             markerSign.setFill(Color.FORESTGREEN);
             markerSign.setStroke(Color.FORESTGREEN);
+            markerSign.setX(pxPos - 25.5);
+            markerSign.setY(24.5);
+            markerSign.setWidth(26);
+            if (userEvent.getName().length() == 1) {
+                // user event is from the bottom pad line (name has only letters)
+                markerSign.setHeight(25);
+            } else {
+                // user event is from the top pad line (name has letter and number eg. A1)
+                markerSign.setHeight(50);
+            }
             songGrid.getChildren().add(markerSign);
 
             Text markerLetter;
-            if (userEvent.getName() != null && userEvent.getName().length() > 0) {
+            if (userEvent.getName().length() > 0) {
                 markerLetter = new Text(userEvent.getName().substring(0, 1));
             } else {
                 markerLetter = new Text("?");
             }
-            markerLetter.setX(pxPos - 21);
-            markerLetter.setY(45);
-
             //markerLetter.setScaleX(1.5);
             //markerLetter.setScaleY(1.5);
+
+            markerLetter.setX(pxPos - 21);
+            markerLetter.setY(45);
 
             markerLetter.setStyle("-fx-font: 24 arial;");
             markerLetter.setStroke(Color.WHITE);
             markerLetter.setFill(Color.WHITE);
             markerLetter.setStrokeType(StrokeType.INSIDE);
             songGrid.getChildren().add(markerLetter);
+
+            if (userEvent.getName().length() == 2) {
+                Text markerLetterNumber = new Text(userEvent.getName().substring(1, 2));
+                markerLetterNumber.setStyle("-fx-font: 24 arial;");
+                markerLetterNumber.setStroke(Color.WHITE);
+                markerLetterNumber.setFill(Color.WHITE);
+                markerLetterNumber.setStrokeType(StrokeType.INSIDE);
+                markerLetterNumber.setX(pxPos - 19);
+                markerLetterNumber.setY(70);
+
+                songGrid.getChildren().add(markerLetterNumber);
+            }
+
         }
     }
 
