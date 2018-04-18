@@ -20,11 +20,6 @@ public class Library {
     private void createSongs() {
         songList.add(HowYouRemindMe.createSong());
     }
-
-    private Song createHowYouRemindMe() {
-
-    }
-
     /**
      * creates an empty gig which can be filled with data afterwards
      *

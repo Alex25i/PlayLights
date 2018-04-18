@@ -8,7 +8,7 @@ public class HowYouRemindMe {
 
     public static Song createSong() {
         Song hyrm = new Song("How you remind me", "Nickelback", 172, 4,
-                new BeatStamp(50, 1), MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON,
+                new BeatStamp(160, 1), MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON,
                 2, 0, MidiOrganizer.VELOCITY_FULL), MixTrackController.PAD.PAD_0X1);
 
         MixTrackController.PAD triggerPad;
@@ -32,6 +32,21 @@ public class HowYouRemindMe {
             //TODO: Implement -> Blink pad
         });
         padAction.addUserEvent(userEvent);
+
+        // User Events
+        beatStamp = new BeatStamp(45, 1);
+        userEvent = hyrm.addUserEvent("A", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        // User Events
+        beatStamp = new BeatStamp(93, 1);
+        userEvent = hyrm.addUserEvent("A", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+        //----------------------------------------
         //----------------------------------------
 
 
@@ -48,8 +63,15 @@ public class HowYouRemindMe {
                     MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 3, MidiOrganizer.VELOCITY_FULL));
         });
 
-        // User Events
+        // User Event
         beatStamp = new BeatStamp(19, 1);
+        userEvent = hyrm.addUserEvent("B", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        // User Event
+        beatStamp = new BeatStamp(59, 1);
         userEvent = hyrm.addUserEvent("B", beatStamp, triggerPad, () -> {
             //TODO: Implement -> Blink pad
         });
@@ -69,6 +91,27 @@ public class HowYouRemindMe {
 
         // User Events
         beatStamp = new BeatStamp(21, 1);
+        userEvent = hyrm.addUserEvent("C", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        // User Events
+        beatStamp = new BeatStamp(37, 1);
+        userEvent = hyrm.addUserEvent("C", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        // User Events
+        beatStamp = new BeatStamp(61, 1);
+        userEvent = hyrm.addUserEvent("C", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        // User Events
+        beatStamp = new BeatStamp(77, 1);
         userEvent = hyrm.addUserEvent("C", beatStamp, triggerPad, () -> {
             //TODO: Implement -> Blink pad
         });
@@ -93,8 +136,22 @@ public class HowYouRemindMe {
         });
         padAction.addUserEvent(userEvent);
 
-
+        // User Events
         beatStamp = new BeatStamp(30, 1);
+        userEvent = hyrm.addUserEvent("C1", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        // User Events
+        beatStamp = new BeatStamp(69, 1);
+        userEvent = hyrm.addUserEvent("C1", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        // User Events
+        beatStamp = new BeatStamp(70, 1);
         userEvent = hyrm.addUserEvent("C1", beatStamp, triggerPad, () -> {
             //TODO: Implement -> Blink pad
         });
@@ -125,6 +182,19 @@ public class HowYouRemindMe {
             //TODO: Implement -> Blink pad
         });
         padAction.addUserEvent(userEvent);
+
+        beatStamp = new BeatStamp(69, 3);
+        userEvent = hyrm.addUserEvent("C2", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+
+        beatStamp = new BeatStamp(70, 3);
+        userEvent = hyrm.addUserEvent("C2", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
         //----------------------------------------
 
         // Pad Action
@@ -139,6 +209,13 @@ public class HowYouRemindMe {
 
         // User Events
         beatStamp = new BeatStamp(31, 1);
+        userEvent = hyrm.addUserEvent("C3", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        // User Events
+        beatStamp = new BeatStamp(71, 1);
         userEvent = hyrm.addUserEvent("C3", beatStamp, triggerPad, () -> {
             //TODO: Implement -> Blink pad
         });
