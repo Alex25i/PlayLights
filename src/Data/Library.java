@@ -111,6 +111,42 @@ public class Library {
         padAction.addUserEvent(userEvent);
 
 
+        // Pad Action
+        triggerPad = MixTrackController.PAD.PAD_0X0;
+        padAction = hyrm.addPadAction(triggerPad, 2, new Runnable() {
+            @Override
+            public void run() {
+                //TODO: Implement
+                // Example
+                MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
+                PlayLights.getInstance().getSongPlayer().getTriggerJobs().schedulePeriodicJop(0, 2,
+                        2, MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 5,
+                                MidiOrganizer.VELOCITY_FULL));
+                PlayLights.getInstance().getSongPlayer().getTriggerJobs().schedulePeriodicJop(2, 1,
+                        2, MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 6,
+                                MidiOrganizer.VELOCITY_FULL));
+            }
+        });
+
+        // User Events
+        beatStamp = new BeatStamp(29, 1);
+        userEvent = hyrm.addUserEvent("Chorus", beatStamp, triggerPad, new Runnable() {
+            @Override
+            public void run() {
+                //TODO: Implement -> Blink pad
+            }
+        });
+        padAction.addUserEvent(userEvent);
+        beatStamp = new BeatStamp(30, 1);
+        userEvent = hyrm.addUserEvent("Chorus", beatStamp, triggerPad, new Runnable() {
+            @Override
+            public void run() {
+                //TODO: Implement -> Blink pad
+            }
+        });
+        padAction.addUserEvent(userEvent);
+
+
         return hyrm;
     }
 

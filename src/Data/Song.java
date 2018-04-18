@@ -147,6 +147,9 @@ public class Song {
                     // triggered pad is not root and not empty
                     padActionList.add(padActionArray[bank]);
                 }
+            } else if (padActionArray[bank] != null) {
+                // triggered pad is not root and not empty
+                padActionList.add(padActionArray[bank]);
             }
         }
         return padActionList;
