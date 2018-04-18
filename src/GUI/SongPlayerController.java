@@ -7,6 +7,7 @@ import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -33,6 +34,18 @@ public class SongPlayerController {
     @FXML
     public SubScene mainScene;
 
+    @FXML
+    private Label songNameLb;
+
+    @FXML
+    private Label songNrLb;
+
+    @FXML
+    private Label songLengthLb;
+
+    @FXML
+    private Label nextUserActionLb;
+
     private Group songGrid;
     private Line positionIndicator;
 
@@ -50,6 +63,7 @@ public class SongPlayerController {
         drawSongGrid();
         drawUserEventMarker();
         drawStaticOverlay();
+        fillSongDescription();
 
         prepareAnimation(songEnd);
     }
@@ -229,6 +243,10 @@ public class SongPlayerController {
             markerLetter.setStrokeType(StrokeType.INSIDE);
             songGrid.getChildren().add(markerLetter);
         }
+    }
+
+    private void fillSongDescription() {
+        songNameLb.setText(player.getCurrentSong().getInterpret() + " - " + player.getCurrentSong().getName());
     }
 
     /**

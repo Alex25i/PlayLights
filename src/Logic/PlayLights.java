@@ -68,11 +68,11 @@ public class PlayLights extends Application {
         //loadSongPlayer(library.getSongList().get(0));
     }
 
-    public void loadSongPlayer(Song song) {
+    public void loadSongPlayer(Song song, Gig gig, int songPos) {
         Platform.runLater(() -> {
             String resourcePath = "../GUI/songPlayer.fxml";
             loadScene(resourcePath);
-            songPlayer = new SongPlayer(song);
+            songPlayer = new SongPlayer(song, gig, songPos);
         });
         getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FOLDER_LED_ADDRESS, false);
         getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FILE_LED_ADDRESS, false);

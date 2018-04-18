@@ -1,6 +1,7 @@
 package Logic;
 
 import Data.BeatStamp;
+import Data.Gig;
 import Data.Song;
 import GUI.SongPlayerController;
 import Logic.tempo.LiveTimeCode;
@@ -12,15 +13,20 @@ import java.util.ArrayList;
 
 public class SongPlayer {
     private Song currentSong;
+    private Gig currentGig;
+    private int songPos; // position of song in the gig. Independent of sets.
     private LiveTimeCode timeCode;
     private TempoRecognition tempoRecognition; // currently not used
     private TriggerJobs triggerJobs;
 
 
-    public SongPlayer(Song currentSong) {
+    public SongPlayer(Song currentSong, Gig currentGig, int songPos) {
         this.currentSong = currentSong;
         timeCode = new LiveTimeCode(currentSong);
         triggerJobs = new TriggerJobs(timeCode);
+
+        this.currentGig = currentGig;
+        this.songPos = songPos;
 
         MidiOrganizer midiOrganizer = PlayLights.getInstance().getMidiOrganizer();
         midiOrganizer.sendMidiMessage(currentSong.getStartUpMessage(), midiOrganizer.getMpcDeviceConnector());

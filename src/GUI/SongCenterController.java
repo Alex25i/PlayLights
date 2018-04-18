@@ -29,6 +29,7 @@ public class SongCenterController {
     private TableView<Gig> gigTable;
     private TableView<TableSong> songTable;
     private ObservableList<Gig> gigs;
+    private Gig currentGig;
 
     @FXML
     public void initialize() {
@@ -122,8 +123,6 @@ public class SongCenterController {
         interpretColumn.setReorderable(false);
         songLengthColumn.setReorderable(false);
         tempoColumn.setReorderable(false);
-
-
         setNrColumn.setReorderable(false);
     }
 
@@ -208,7 +207,8 @@ public class SongCenterController {
                         // no list item selected
                         break;
                     }
-                    songTable.setItems(generateSongPosition(gigTable.getSelectionModel().getSelectedItem()));
+                    currentGig = gigTable.getSelectionModel().getSelectedItem();
+                    songTable.setItems(generateSongPosition(currentGig));
                     songTable.getSelectionModel().clearAndSelect(0);
                     showTable(songTable);
                 }
@@ -236,7 +236,8 @@ public class SongCenterController {
                         // no list item selected
                         break;
                     }
-                    PlayLights.getInstance().loadSongPlayer(songTable.getSelectionModel().getSelectedItem().song);
+                    PlayLights.getInstance().loadSongPlayer(songTable.getSelectionModel().getSelectedItem().song,
+                            currentGig, songTable.getSelectionModel().getSelectedIndex());
                 } else if (action == 4) {
                     showTable(gigTable);
                 }
