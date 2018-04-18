@@ -56,6 +56,7 @@ public class Library {
             }
         });
         padAction.addUserEvent(userEvent);
+        //----------------------------------------
 
 
         // Pad Action
@@ -84,6 +85,7 @@ public class Library {
             }
         });
         padAction.addUserEvent(userEvent);
+        //----------------------------------------
 
 
         // Pad Action
@@ -93,7 +95,6 @@ public class Library {
             public void run() {
                 //TODO: Implement
                 // Example
-                MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
                 PlayLights.getInstance().getSongPlayer().getTriggerJobs().schedulePeriodicJop(0, Integer.MAX_VALUE,
                         2, MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 4,
                                 MidiOrganizer.VELOCITY_FULL));
@@ -109,6 +110,7 @@ public class Library {
             }
         });
         padAction.addUserEvent(userEvent);
+        //----------------------------------------
 
 
         // Pad Action
@@ -119,12 +121,8 @@ public class Library {
                 //TODO: Implement
                 // Example
                 MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
-                PlayLights.getInstance().getSongPlayer().getTriggerJobs().schedulePeriodicJop(0, 2,
-                        2, MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 5,
-                                MidiOrganizer.VELOCITY_FULL));
-                PlayLights.getInstance().getSongPlayer().getTriggerJobs().schedulePeriodicJop(2, 1,
-                        2, MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 6,
-                                MidiOrganizer.VELOCITY_FULL));
+                mo.sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 5, MidiOrganizer.VELOCITY_FULL,
+                        mo.getMpcDeviceConnector());
             }
         });
 
@@ -137,6 +135,8 @@ public class Library {
             }
         });
         padAction.addUserEvent(userEvent);
+
+
         beatStamp = new BeatStamp(30, 1);
         userEvent = hyrm.addUserEvent("Chorus", beatStamp, triggerPad, new Runnable() {
             @Override
@@ -145,7 +145,65 @@ public class Library {
             }
         });
         padAction.addUserEvent(userEvent);
+        //----------------------------------------
 
+
+        // Pad Action
+        triggerPad = MixTrackController.PAD.PAD_1X0;
+        padAction = hyrm.addPadAction(triggerPad, 2, new Runnable() {
+            @Override
+            public void run() {
+                //TODO: Implement
+                // Example
+                MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
+                mo.sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 6, MidiOrganizer.VELOCITY_FULL,
+                        mo.getMpcDeviceConnector());
+            }
+        });
+
+        // User Events
+        beatStamp = new BeatStamp(29, 3);
+        userEvent = hyrm.addUserEvent("Chorus", beatStamp, triggerPad, new Runnable() {
+            @Override
+            public void run() {
+                //TODO: Implement -> Blink pad
+            }
+        });
+        padAction.addUserEvent(userEvent);
+
+
+        beatStamp = new BeatStamp(30, 3);
+        userEvent = hyrm.addUserEvent("Chorus", beatStamp, triggerPad, new Runnable() {
+            @Override
+            public void run() {
+                //TODO: Implement -> Blink pad
+            }
+        });
+        padAction.addUserEvent(userEvent);
+        //----------------------------------------
+
+        // Pad Action
+        triggerPad = MixTrackController.PAD.PAD_2X0;
+        padAction = hyrm.addPadAction(triggerPad, 2, new Runnable() {
+            @Override
+            public void run() {
+                //TODO: Implement
+                // Example
+                MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
+                mo.sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 7, MidiOrganizer.VELOCITY_FULL,
+                        mo.getMpcDeviceConnector());
+            }
+        });
+
+        // User Events
+        beatStamp = new BeatStamp(31, 1);
+        userEvent = hyrm.addUserEvent("Chorus", beatStamp, triggerPad, new Runnable() {
+            @Override
+            public void run() {
+                //TODO: Implement -> Blink pad
+            }
+        });
+        padAction.addUserEvent(userEvent);
 
         return hyrm;
     }

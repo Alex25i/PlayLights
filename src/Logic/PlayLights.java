@@ -113,7 +113,6 @@ public class PlayLights extends Application {
         gig = library.createGig("Musikschule", LocalDate.of(2018, 3, 11));
         set = gig.createSet();
         set.addSong(library.getSongList().get(0));
-
     }
 
     public Stage getPrimaryStage() {
