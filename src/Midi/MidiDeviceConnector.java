@@ -58,6 +58,14 @@ public class MidiDeviceConnector {
                     device.open();
                 } catch (MidiUnavailableException e) {
                     e.printStackTrace();
+
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Device is busy");
+                    alert.setContentText("The " + devNamePart + " midi device is already used in an other application.\n" +
+                            "Close the other application before you retry.");
+                    alert.showAndWait();
+                    System.exit(2);
                 }
 
                 try {

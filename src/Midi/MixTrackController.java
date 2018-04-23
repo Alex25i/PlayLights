@@ -211,6 +211,10 @@ public class MixTrackController {
     private Map<Byte, Timer> blinkingLEDs;
     private int activeBank;
 
+    // overwrites for the intensity faders
+    private boolean cueAOverwrite = false;
+    private boolean cueBOverwrite = false;
+
     MixTrackController() {
         blinkingLEDs = new HashMap<>();
         activeBank = 0;
@@ -561,5 +565,30 @@ public class MixTrackController {
                 setLedIllumination(padAddress, targetLEDStatus.get(padAddress));
             }
         }
+    }
+
+    void cueASelectPressed() {
+        cueAOverwrite = !cueAOverwrite;
+        if (cueAOverwrite) {
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 0,
+                    MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
+        } else {
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 1,
+                    MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
+
+        }
+        setLedIllumination(CUE_HEADPHONE_A_LED_ADDRESS, cueAOverwrite);
+    }
+
+    void cueBSelectPressed() {
+        cueBOverwrite = !cueBOverwrite;
+        if (cueBOverwrite) {
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2,
+                    MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
+        } else {
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 3,
+                    MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
+        }
+        setLedIllumination(CUE_HEADPHONE_B_LED_ADDRESS, cueBOverwrite);
     }
 }

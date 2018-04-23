@@ -84,6 +84,19 @@ public class MidiOrganizer {
 
             }
 
+            // independent weather a song is loaded or not
+            if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.GAIN_A_FADER_ADDRESS) {
+                sendMidiMessage(MESSAGE_TYPE_COMMAND, 0, 1, midiVelocity, mpcDeviceConnector);
+            } else if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.GAIN_MASTER_FADER_ADDRESS) {
+                sendMidiMessage(MESSAGE_TYPE_COMMAND, 0, 2, midiVelocity, mpcDeviceConnector);
+            } else if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.GAIN_B_FADER_ADDRESS) {
+                sendMidiMessage(MESSAGE_TYPE_COMMAND, 0, 3, midiVelocity, mpcDeviceConnector);
+            } else if (midiType == MESSAGE_TYPE_NODE_ON && midiNode == MixTrackController.CUE_HEADPHONE_A_ADDRESS && midiVelocity == VELOCITY_FULL) {
+                mixTrackController.cueASelectPressed();
+            } else if (midiType == MESSAGE_TYPE_NODE_ON && midiNode == MixTrackController.CUE_HEADPHONE_B_ADDRESS && midiVelocity == VELOCITY_FULL) {
+                mixTrackController.cueBSelectPressed();
+            }
+
         } else if (sourceName.contains("LoopBe")) {
 
         }
