@@ -67,6 +67,28 @@ public class Song {
     }
 
     /**
+     * calculates the next upcoming {@link UserEvent} base on the given {@link BeatStamp}
+     *
+     * @param revBeat a {@link BeatStamp } as reverence point from which on the next {@link UserEvent} will be calculated
+     * @return the calculated {@link UserEvent}
+     */
+    public UserEvent calcNextUserEvent(BeatStamp revBeat) {
+        UserEvent nearestEvent = null;
+        int nearestDistance = Integer.MAX_VALUE;
+        for (UserEvent userEvent : userEvents) {
+            int currentDistance = calcBeatDistance(revBeat, userEvent.getEventTime());
+            if (currentDistance >= 0 && currentDistance < nearestDistance) {
+                nearestEvent = userEvent;
+                nearestDistance = currentDistance;
+            }
+        }
+        if (nearestEvent == null) {
+            new Exception("No nearest event could be found").printStackTrace();
+        }
+        return nearestEvent;
+    }
+
+    /**
      * @return sum of the beats of the song in total
      */
     public int calcTotalBeatCount() {

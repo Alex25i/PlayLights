@@ -278,6 +278,16 @@ public class SongPlayerController {
         songNameLb.setText(player.getCurrentSong().getInterpret() + " - " + player.getCurrentSong().getName());
         songNrLb.setText(String.valueOf(player.getSongPos() + 1));
         songLengthLb.setText(String.valueOf(player.getCurrentSong().getLastBeat().getBarNr()) + " bars");
+        setNextUserEvent(player.getCurrentSong().calcNextUserEvent(BeatStamp.FIRST_BEAT));
+    }
+
+    public void setNextUserEvent(Song.UserEvent nextUserEvent) {
+        if (nextUserEvent != null) {
+            nextUserActionLb.setText(nextUserEvent.getName() + " at Bar " + nextUserEvent.getEventTime().getBarNr()
+                    + " Beat " + nextUserEvent.getEventTime().getBeatNr());
+        } else {
+            nextUserActionLb.setText("-none-");
+        }
     }
 
     /**

@@ -106,6 +106,7 @@ public class SongPlayer {
         triggerJobs.stopAllTimer();
         padAction.getAction().run();
 
+
         if (timeCode.isRunning() && currentSong.calcBeatDistance(currentSong.getLastBeat(), timeCode.calcCurrentBeatPos()) >= 0) {
             // pad was pressed while the animation already finished (but the time code kept going)
             PlayLights.getInstance().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.CUE_B_LED_ADDRESS);
@@ -113,6 +114,8 @@ public class SongPlayer {
         }
 
         timeCode.syncNow(currentSong.getClosestEventOfPadAction(padAction, timeCode.calcCurrentBeatPos()).getEventTime());
+        SongPlayerController.getInstance().setNextUserEvent(currentSong.calcNextUserEvent(timeCode.calcCurrentBeatPos()));
+
         if (!SongPlayerController.getInstance().animationIsRunning()) {
             SongPlayerController.getInstance().startAnimation();
         }
