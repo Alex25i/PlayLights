@@ -77,13 +77,15 @@ public class Song {
         int nearestDistance = Integer.MAX_VALUE;
         for (UserEvent userEvent : userEvents) {
             int currentDistance = calcBeatDistance(revBeat, userEvent.getEventTime());
-            if (currentDistance >= 0 && currentDistance < nearestDistance) {
+            if (currentDistance > 0 && currentDistance < nearestDistance) {
                 nearestEvent = userEvent;
                 nearestDistance = currentDistance;
             }
         }
         if (nearestEvent == null) {
-            new Exception("No nearest event could be found").printStackTrace();
+            if (PlayLights.verbose) {
+                new Exception("No nearest event could be found. This is okay if this is the last user event").printStackTrace();
+            }
         }
         return nearestEvent;
     }

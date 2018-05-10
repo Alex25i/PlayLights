@@ -88,7 +88,7 @@ public class LiveTimeCode {
         // time passed in milliseconds since the last time code sync was triggered
         final long timeSinceLastSync = System.currentTimeMillis() - reverenceTime;
         // validate result
-        if (timeSinceLastSync <= 0) {
+        if (timeSinceLastSync < 0) {
             new IllegalStateException("TimeCode Sync is in the future. " +
                     "Check your implementation why this seems to be the case!").printStackTrace();
         }

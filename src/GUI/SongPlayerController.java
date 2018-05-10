@@ -4,6 +4,7 @@ import Data.BeatStamp;
 import Data.Song;
 import Logic.SongPlayer;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
@@ -282,12 +283,14 @@ public class SongPlayerController {
     }
 
     public void setNextUserEvent(Song.UserEvent nextUserEvent) {
-        if (nextUserEvent != null) {
-            nextUserActionLb.setText(nextUserEvent.getName() + " at Bar " + nextUserEvent.getEventTime().getBarNr()
-                    + " Beat " + nextUserEvent.getEventTime().getBeatNr());
-        } else {
-            nextUserActionLb.setText("-none-");
-        }
+        Platform.runLater(() -> {
+            if (nextUserEvent != null) {
+                nextUserActionLb.setText(nextUserEvent.getName() + " at Bar " + nextUserEvent.getEventTime().getBarNr()
+                        + " Beat " + nextUserEvent.getEventTime().getBeatNr());
+            } else {
+                nextUserActionLb.setText("-none-");
+            }
+        });
     }
 
     /**

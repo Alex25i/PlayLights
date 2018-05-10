@@ -273,6 +273,46 @@ public class HowYouRemindMe {
         });
         padAction.addUserEvent(userEvent);
 
+        // User Events
+        beatStamp = new BeatStamp(129, 3);
+        userEvent = hyrm.addUserEvent("E", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        // User Events
+        beatStamp = new BeatStamp(130, 3);
+        userEvent = hyrm.addUserEvent("E", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        //----------------------------------------
+
+        // Pad Action
+        triggerPad = MixTrackController.PAD.PAD_0X0;
+        padAction = hyrm.addPadAction(triggerPad, 4, () -> {
+            //TODO: Implement
+            // Example
+            MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
+            mo.sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 10, MidiOrganizer.VELOCITY_FULL,
+                    mo.getMpcDeviceConnector());
+        });
+
+        // User Events
+        beatStamp = new BeatStamp(129, 1);
+        userEvent = hyrm.addUserEvent("E1", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        // User Events
+        beatStamp = new BeatStamp(130, 1);
+        userEvent = hyrm.addUserEvent("E1", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
 
         return hyrm;
     }
