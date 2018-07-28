@@ -8,7 +8,7 @@ public class HowYouRemindMe {
 
     public static Song createSong() {
         Song hyrm = new Song("How you remind me", "Nickelback", 172, 4,
-                new BeatStamp(160, 1), MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON,
+                new BeatStamp(151, 4), MidiOrganizer.createMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON,
                 2, 0, MidiOrganizer.VELOCITY_FULL), MixTrackController.PAD.PAD_0X1);
 
         MixTrackController.PAD triggerPad;
@@ -125,6 +125,13 @@ public class HowYouRemindMe {
 
         // User Events
         beatStamp = new BeatStamp(121, 1);
+        userEvent = hyrm.addUserEvent("C", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        // User Events
+        beatStamp = new BeatStamp(131, 1);
         userEvent = hyrm.addUserEvent("C", beatStamp, triggerPad, () -> {
             //TODO: Implement -> Blink pad
         });
@@ -309,6 +316,25 @@ public class HowYouRemindMe {
         // User Events
         beatStamp = new BeatStamp(130, 1);
         userEvent = hyrm.addUserEvent("E1", beatStamp, triggerPad, () -> {
+            //TODO: Implement -> Blink pad
+        });
+        padAction.addUserEvent(userEvent);
+
+        //----------------------------------------
+
+        // Pad Action
+        triggerPad = MixTrackController.PAD.PAD_6X1;
+        padAction = hyrm.addPadAction(triggerPad, 0, () -> {
+            //TODO: Implement
+            // Example
+            MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
+            mo.sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2, 11, MidiOrganizer.VELOCITY_FULL,
+                    mo.getMpcDeviceConnector());
+        });
+
+        // User Events
+        beatStamp = new BeatStamp(151, 1);
+        userEvent = hyrm.addUserEvent("F", beatStamp, triggerPad, () -> {
             //TODO: Implement -> Blink pad
         });
         padAction.addUserEvent(userEvent);

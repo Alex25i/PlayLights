@@ -98,6 +98,16 @@ public class Song {
     }
 
     public UserEvent addUserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad, Runnable eventAction) {
+
+        // check for double userEvent creation (at least in this padAction)
+        for (UserEvent existingEvent : userEvents) {
+            if (existingEvent.getEventTime().equals(eventTime)) {
+                if (PlayLights.verbose) {
+                    new IllegalArgumentException("It already exists a user event with this beaStamp").printStackTrace();
+                }
+                return null;
+            }
+        }
         UserEvent userEvent = new UserEvent(name, eventTime, triggerPad, eventAction);
         userEvents.add(userEvent);
         return userEvent;
