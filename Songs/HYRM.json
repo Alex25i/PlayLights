@@ -1,0 +1,99 @@
+{
+  "type": "Song",
+  "name": "How you remind me",
+  "interpret": "Nickelback",
+  "tempo": 172,
+  "beatsPerBar": 4,
+  "lastBeat": {
+    "bar": 151,
+    "beatNr": 4
+  },
+  "startUpMessage": {
+    "type": "MidiMessage",
+    "messageType": "NOTE_ON",
+    "channel": 2,
+    "note": 0,
+    "velocity": "Full"
+  },
+  "padActions": [
+    {
+      "triggerPad": "PAD_0X1",
+      "bank": 0,
+      "actions": [
+        {
+          "type": "MidiMessage",
+          "messageType": "NOTE_ON",
+          "channel": 2,
+          "note": 1,
+          "velocity": "Full"
+        }
+      ],
+      "userEvents": [
+        {
+          "label": "A",
+          "bar": 13,
+          "beatNr": 1
+        },
+        {
+          "label": "A",
+          "bar": 45,
+          "beatNr": 1
+        },
+        {
+          "label": "A",
+          "bar": 131,
+          "beatNr": 1
+        }
+      ]
+    },
+    {
+      "triggerPad": "PAD_1X1",
+      "bank": 0,
+      "actions": [
+        {
+          "type": "PeriodicJop",
+          "startDelay": 0,
+          "iterations": 4,
+          "interval": 1,
+          "message": {
+            "type": "MidiMessage",
+            "messageType": "NOTE_ON",
+            "channel": 2,
+            "note": 2,
+            "velocity": "Full"
+          }
+        },
+        {
+          "type": "PeriodicJop",
+          "startDelay": 4,
+          "iterations": 8,
+          "interval": 0.5,
+          "message": {
+            "type": "MidiMessage",
+            "messageType": "NOTE_ON",
+            "channel": 2,
+            "note": 3,
+            "velocity": "Full"
+          }
+        }
+      ],
+      "userEvents": [
+        {
+          "label": "B",
+          "bar": 19,
+          "beatNr": 1
+        },
+        {
+          "label": "B",
+          "bar": 59,
+          "beatNr": 1
+        },
+        {
+          "label": "B",
+          "bar": 119,
+          "beatNr": 1
+        }
+      ]
+    }
+  ]
+}
