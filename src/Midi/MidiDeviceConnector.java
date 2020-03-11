@@ -17,7 +17,7 @@ public class MidiDeviceConnector {
     private String deviceName = "";
 
     public MidiDeviceConnector(String devNamePart) {
-        searchForDevice(devNamePart);
+        connectDevice(devNamePart);
 
         MidiDevice md = getMidiDevice();
         Receiver mdR = null;
@@ -36,7 +36,7 @@ public class MidiDeviceConnector {
         mdT.setReceiver(receiver);
     }
 
-    private void searchForDevice(String devNamePart) {
+    private void connectDevice(String devNamePart) {
         // Obtain information about all the installed devices.
         MidiDevice device = null;
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
@@ -50,6 +50,7 @@ public class MidiDeviceConnector {
                 }
             } catch (MidiUnavailableException e) {
                 // Handle or throw exception...
+                // e.printStackTrace();
             }
             if (device.getDeviceInfo().getName().toLowerCase().contains(devNamePart.toLowerCase())) {
                 found = true;

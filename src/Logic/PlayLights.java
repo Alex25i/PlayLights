@@ -67,7 +67,7 @@ public class PlayLights extends Application {
 
     public void loadSongPlayer(Song song, Gig gig, int songPos) {
         Platform.runLater(() -> {
-            String resourcePath = "../GUI/songPlayer.fxml";
+            String resourcePath = "/GUI/songPlayer.fxml";
             loadScene(resourcePath);
             songPlayer = new SongPlayer(song, gig, songPos);
         });
@@ -77,7 +77,7 @@ public class PlayLights extends Application {
 
     public void loadSongCenter() {
         Platform.runLater(() -> {
-            String resourcePath = "../GUI/songCenter.fxml";
+            String resourcePath = "/GUI/songCenter.fxml";
             loadScene(resourcePath);
         });
     }
