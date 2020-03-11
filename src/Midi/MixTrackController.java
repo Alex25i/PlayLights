@@ -299,7 +299,7 @@ public class MixTrackController {
     //TODO: Be robust against not connected device
     public void setLedIllumination(byte ledAddress, boolean on) {
         int[] midiMessage = new int[3];
-        midiMessage[0] = MidiOrganizer.MESSAGE_TYPE_NODE_ON;
+        midiMessage[0] = MidiOrganizer.MESSAGE_TYPE_NOTE_ON;
         midiMessage[1] = ledAddress;
         if (on) {
             midiMessage[2] = MidiOrganizer.VELOCITY_FULL;
@@ -570,10 +570,10 @@ public class MixTrackController {
     void cueASelectPressed() {
         cueAOverwrite = !cueAOverwrite;
         if (cueAOverwrite) {
-            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 0,
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 0,
                     MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
         } else {
-            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 1,
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 1,
                     MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
 
         }
@@ -583,10 +583,10 @@ public class MixTrackController {
     void cueBSelectPressed() {
         cueBOverwrite = !cueBOverwrite;
         if (cueBOverwrite) {
-            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 2,
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 2,
                     MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
         } else {
-            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NODE_ON, 3,
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 3,
                     MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
         }
         setLedIllumination(CUE_HEADPHONE_B_LED_ADDRESS, cueBOverwrite);

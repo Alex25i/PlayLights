@@ -47,7 +47,7 @@ public class TriggerJobs {
             public void run() {
                 if (iteration <= iterations) {
                     MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
-                    mo.sendMidiMessage(midiMessage, mo.getMpcDeviceConnector());
+                    mo.sendMpcMidiMessage(midiMessage);
                 } else {
                     timer.cancel();
                     jobs.remove(timer);

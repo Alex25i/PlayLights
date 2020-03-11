@@ -97,7 +97,7 @@ public class Song {
         return calcBeatDistance(BeatStamp.FIRST_BEAT, getLastBeat());
     }
 
-    public UserEvent addUserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad, Runnable eventAction) {
+    public UserEvent addUserEvent(String label, BeatStamp eventTime, Runnable eventAction) {
 
         // check for double userEvent creation (at least in this padAction)
         for (UserEvent existingEvent : userEvents) {
@@ -108,7 +108,7 @@ public class Song {
                 return null;
             }
         }
-        UserEvent userEvent = new UserEvent(name, eventTime, triggerPad, eventAction);
+        UserEvent userEvent = new UserEvent(label, eventTime, eventAction);
         userEvents.add(userEvent);
         return userEvent;
     }
@@ -194,15 +194,14 @@ public class Song {
      * order to trigger a @{@link PadAction}
      */
     public class UserEvent implements Comparable {
-        private String name;
+        private String label;
         private BeatStamp eventTime;
         private MixTrackController.PAD triggerPad;
         private Runnable eventAction;
 
-        private UserEvent(String name, BeatStamp eventTime, MixTrackController.PAD triggerPad, Runnable eventAction) {
-            this.name = name;
+        private UserEvent(String label, BeatStamp eventTime, Runnable eventAction) {
+            this.label = label;
             this.eventTime = eventTime;
-            this.triggerPad = triggerPad;
             this.eventAction = eventAction;
         }
 
@@ -254,16 +253,12 @@ public class Song {
             return beatsTotalThisObject - beatsTotalGivenObject;
         }
 
-        public String getName() {
-            return name;
+        public String getLabel() {
+            return label;
         }
 
         public BeatStamp getEventTime() {
             return eventTime;
-        }
-
-        public MixTrackController.PAD getTriggerPad() {
-            return triggerPad;
         }
 
         public Runnable getEventAction() {

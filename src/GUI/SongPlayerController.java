@@ -233,7 +233,7 @@ public class SongPlayerController {
             markerSign.setX(pxPos - 25.5);
             markerSign.setY(24.5);
             markerSign.setWidth(26);
-            if (userEvent.getName().length() == 1) {
+            if (userEvent.getLabel().length() == 1) {
                 // user event is from the bottom pad line (name has only letters)
                 markerSign.setHeight(25);
             } else {
@@ -243,8 +243,8 @@ public class SongPlayerController {
             songGrid.getChildren().add(markerSign);
 
             Text markerLetter;
-            if (userEvent.getName().length() > 0) {
-                markerLetter = new Text(userEvent.getName().substring(0, 1));
+            if (userEvent.getLabel().length() > 0) {
+                markerLetter = new Text(userEvent.getLabel().substring(0, 1));
             } else {
                 markerLetter = new Text("?");
             }
@@ -260,8 +260,8 @@ public class SongPlayerController {
             markerLetter.setStrokeType(StrokeType.INSIDE);
             songGrid.getChildren().add(markerLetter);
 
-            if (userEvent.getName().length() == 2) {
-                Text markerLetterNumber = new Text(userEvent.getName().substring(1, 2));
+            if (userEvent.getLabel().length() == 2) {
+                Text markerLetterNumber = new Text(userEvent.getLabel().substring(1, 2));
                 markerLetterNumber.setStyle("-fx-font: 24 arial;");
                 markerLetterNumber.setStroke(Color.WHITE);
                 markerLetterNumber.setFill(Color.WHITE);
@@ -278,14 +278,14 @@ public class SongPlayerController {
     private void fillSongDescription() {
         songNameLb.setText(player.getCurrentSong().getInterpret() + " - " + player.getCurrentSong().getName());
         songNrLb.setText(String.valueOf(player.getSongPos() + 1));
-        songLengthLb.setText(String.valueOf(player.getCurrentSong().getLastBeat().getBarNr()) + " bars");
+        songLengthLb.setText(player.getCurrentSong().getLastBeat().getBarNr() + " bars");
         setNextUserEvent(player.getCurrentSong().calcNextUserEvent(BeatStamp.FIRST_BEAT));
     }
 
     public void setNextUserEvent(Song.UserEvent nextUserEvent) {
         Platform.runLater(() -> {
             if (nextUserEvent != null) {
-                nextUserActionLb.setText(nextUserEvent.getName() + " at Bar " + nextUserEvent.getEventTime().getBarNr()
+                nextUserActionLb.setText(nextUserEvent.getLabel() + " at Bar " + nextUserEvent.getEventTime().getBarNr()
                         + " Beat " + nextUserEvent.getEventTime().getBeatNr());
             } else {
                 nextUserActionLb.setText("-none-");

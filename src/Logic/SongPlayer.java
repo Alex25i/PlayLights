@@ -29,7 +29,7 @@ public class SongPlayer {
         this.songPos = songPos;
 
         MidiOrganizer midiOrganizer = PlayLights.getInstance().getMidiOrganizer();
-        midiOrganizer.sendMidiMessage(currentSong.getStartUpMessage(), midiOrganizer.getMpcDeviceConnector());
+        midiOrganizer.sendMpcMidiMessage(currentSong.getStartUpMessage());
 
 
         PlayLights.getInstance().getMidiOrganizer().getMixTrackController().prepareSong(currentSong);
@@ -163,7 +163,7 @@ public class SongPlayer {
 
             //song is stopped not at the beginning of the song or the song is running after the last beat of the song
             MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
-            mo.sendMidiMessage(currentSong.getStartUpMessage(), mo.getMpcDeviceConnector());
+            mo.sendMpcMidiMessage(currentSong.getStartUpMessage());
 
             timeCode.reset();
             triggerJobs.stopAllTimer();
