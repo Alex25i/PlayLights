@@ -37,6 +37,7 @@ public class SongReader {
         String interpret = songJSON.getString("interpret");
         int tempo = songJSON.getInt("tempo");
         int beatsPerBar = songJSON.getInt("beatsPerBar");
+        modelComplexity = parseModelComplexity(songJSON.getString("modelComplexity"));
 
         int lastBeatBar = songJSON.getJSONObject("lastBeat").getInt("bar");
         int lastBeatNr = songJSON.getJSONObject("lastBeat").getInt("beatNr");
@@ -45,8 +46,8 @@ public class SongReader {
         JSONObject startUpMessage = songJSON.getJSONObject("startUpMessage");
         ShortMessage midiStartUpMessage = parseMidiMessage(startUpMessage);
 
-        Song song = new Song(
-                songName, interpret, tempo, beatsPerBar, lastBeat, midiStartUpMessage, MixTrackController.PAD.PAD_0X1);
+        Song song = new Song(songName, interpret, tempo, beatsPerBar, complexity, lastBeat, midiStartUpMessage,
+                MixTrackController.PAD.PAD_0X1);
 
         // padActions
         for (Object padActionObj : songJSON.getJSONArray("padActions")) {
@@ -76,6 +77,43 @@ public class SongReader {
         return song;
     }
 
+    private Song.ModelComplexity parseModelComplexity(String modelComplexityString) {
+        if (modelComplexityString.equalsIgnoreCase("complex")) {
+            return Song.ModelComplexity.complex;
+        } else {
+            return Song.ModelComplexity.simple;
+        }
+    }
+
+    private ArrayList<Runnable> createPadActionActionRunnables(JSONArray padActionActionList) {
+        ArrayList<Runnable> padActionActionRunnableList = new ArrayList<>(padActionActionList.length());
+        for (Object padActionActionObj : padActionActionList) {
+            JSONObject padActionAction = (JSONObject) padActionActionObj;
+            String padActionActionType = padActionAction.getString("type");
+            if (padActionActionType.equalsIgnoreCase("MidiMessage")) {
+                // @padActionAction is a normal MidiMessage
+                padActionActionRunnableList.add(createMidiNodeRunnable(parseMidiMessage(padActionAction)));
+            } else if (padActionActionType.equalsIgnoreCase("PeriodicJop")) {
+                // @padActionAction is a periodic PeriodicJop
+                padActionActionRunnableList.add(createPeriodicJopRunnable(padActionAction));
+            }
+        }
+        return padActionActionRunnableList;
+    }
+
+    private ShortMessage parseMidiMessage(JSONObject startUpMessageJSON) {
+        if (startUpMessageJSON.getString("type").equalsIgnoreCase("MidiMessage")) {
+            int messageType = parseMidiMessageType(startUpMessageJSON.getString("messageType"));
+            int channel = startUpMessageJSON.getInt("channel");
+            int note = startUpMessageJSON.getInt("note");
+            int velocity = parseVelocity(startUpMessageJSON.getString("velocity"));
+            return MidiOrganizer.createMidiMessage(messageType, channel, note, velocity);
+        } else {
+            // TODO: add other message types if there are any
+            throw new JSONException("The type filed of the startUpMessage is not equal to \"MidiMessage\""
+                    + startUpMessageJSON.getString("type"));
+        }
+    }
 
     private int parseMidiMessageType(String midiMessageType) {
         int messageType;
@@ -111,36 +149,6 @@ public class SongReader {
             }
         }
         return velocity;
-    }
-
-    private ArrayList<Runnable> createPadActionActionRunnables(JSONArray padActionActionList) {
-        ArrayList<Runnable> padActionActionRunnableList = new ArrayList<>(padActionActionList.length());
-        for (Object padActionActionObj : padActionActionList) {
-            JSONObject padActionAction = (JSONObject) padActionActionObj;
-            String padActionActionType = padActionAction.getString("type");
-            if (padActionActionType.equalsIgnoreCase("MidiMessage")) {
-                // @padActionAction is a normal MidiMessage
-                padActionActionRunnableList.add(createMidiNodeRunnable(parseMidiMessage(padActionAction)));
-            } else if (padActionActionType.equalsIgnoreCase("PeriodicJop")) {
-                // @padActionAction is a periodic PeriodicJop
-                padActionActionRunnableList.add(createPeriodicJopRunnable(padActionAction));
-            }
-        }
-        return padActionActionRunnableList;
-    }
-
-    private ShortMessage parseMidiMessage(JSONObject startUpMessageJSON) {
-        if (startUpMessageJSON.getString("type").equalsIgnoreCase("MidiMessage")) {
-            int messageType = parseMidiMessageType(startUpMessageJSON.getString("messageType"));
-            int channel = startUpMessageJSON.getInt("channel");
-            int note = startUpMessageJSON.getInt("note");
-            int velocity = parseVelocity(startUpMessageJSON.getString("velocity"));
-            return MidiOrganizer.createMidiMessage(messageType, channel, note, velocity);
-        } else {
-            // TODO: add other message types if there are any
-            throw new JSONException("The type filed of the startUpMessage is not equal to \"MidiMessage\""
-                    + startUpMessageJSON.getString("type"));
-        }
     }
 
     private Runnable createPeriodicJopRunnable(JSONObject padPeriodicJopPActionAction) {

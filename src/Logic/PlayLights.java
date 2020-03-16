@@ -65,14 +65,28 @@ public class PlayLights extends Application {
         //loadSongPlayer(library.getSongList().get(0));
     }
 
-    public void loadSongPlayer(Song song, Gig gig, int songPos) {
-        Platform.runLater(() -> {
-            String resourcePath = "/GUI/songPlayer.fxml";
-            loadScene(resourcePath);
-            songPlayer = new SongPlayer(song, gig, songPos);
-        });
-        getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FOLDER_LED_ADDRESS, false);
-        getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FILE_LED_ADDRESS, false);
+    /**
+     * loads the given song and creates a {@link SongPlayer} instance. Checks if the loaded song has a complex model
+     * (with {@link Song.UserEvent}s) or a simple (without {@link Song.UserEvent}s))
+     * @param song
+     * @param gig
+     * @param songPos
+     */
+    public void loadSong(Song song, Gig gig, int songPos) {
+        // check model complexity of song
+        if (song.getUserEvents().isEmpty()) {
+            // simple model
+
+        } else {
+            // complex model
+            Platform.runLater(() -> {
+                String resourcePath = "/GUI/songPlayer.fxml";
+                loadScene(resourcePath);
+                songPlayer = new SongPlayer(song, gig, songPos;
+            });
+            getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FOLDER_LED_ADDRESS, false);
+            getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.FILE_LED_ADDRESS, false);
+        }
     }
 
     public void loadSongCenter() {

@@ -251,7 +251,7 @@ public class SongCenterController {
                         // no list item selected
                         break;
                     }
-                    PlayLights.getInstance().loadSongPlayer(songTable.getSelectionModel().getSelectedItem().song,
+                    PlayLights.getInstance().loadSong(songTable.getSelectionModel().getSelectedItem().song,
                             currentGig, songTable.getSelectionModel().getSelectedIndex());
                 } else if (action == 4) {
                     showTable(gigTable);

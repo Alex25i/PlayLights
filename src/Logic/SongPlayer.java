@@ -35,13 +35,15 @@ public class SongPlayer {
         PlayLights.getInstance().getMidiOrganizer().getMixTrackController().prepareSong(currentSong);
 
         // TODO: This not the final implementation
-        if (SongPlayerController.getInstance() != null) {
-
-            SongPlayerController.getInstance().prepare(this, createSongEndRunnable());
-        } else {
-            new IllegalStateException("Can't prepare SongPlayerController: It is not instanced yet. " +
-                    "Check your implementation! Is the the controller class set in the fxml file?").printStackTrace();
+        if (currentSong.getComplexity() == Song.ModelComplexity.complex) {
+            if (SongPlayerController.getInstance() != null) {
+                SongPlayerController.getInstance().prepare(this, createSongEndRunnable());
+            } else {
+                new IllegalStateException("Can't prepare SongPlayerController: It is not instanced yet. " +
+                        "Check your implementation! Is the the controller class set in the fxml file?").printStackTrace();
+            }
         }
+
         PlayLights.getInstance().getMidiOrganizer().getMixTrackController().updateActiveBank(MixTrackController.PAD.PAD_0X1, currentSong);
     }
 
@@ -77,7 +79,8 @@ public class SongPlayer {
             return;
         }
 
-        if (pad == currentSong.getAutoStartPad() && !timeCode.isRunning() && timeCode.atFirstBeat()) {
+        if (currentSong.getComplexity() == Song.ModelComplexity.complex && pad == currentSong.getAutoStartPad()
+                && !timeCode.isRunning() && timeCode.atFirstBeat()) {
             // pad triggers autoStart of the song
 
             // create new list with same elements as the user events from the PadAction
@@ -100,30 +103,36 @@ public class SongPlayer {
 
 
         //TODO: Maybe implement some security checks before syncing the timeCode
-        if (!timeCode.isRunning()) {
-            return;
-        }
         triggerJobs.stopAllTimer();
         padAction.getAction().run();
 
+        if (currentSong.getComplexity() == Song.ModelComplexity.complex) {
+            if (!timeCode.isRunning()) {
+                return;
+            }
 
-        BeatStamp currentBeatPos = timeCode.calcCurrentBeatPos();
-        if (timeCode.isRunning() && currentSong.calcBeatDistance(currentSong.getLastBeat(), currentBeatPos) >= 0) {
-            // pad was pressed while the animation already finished (but the time code kept going)
-            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.CUE_B_LED_ADDRESS);
-            PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, false);
-        }
+            BeatStamp currentBeatPos = timeCode.calcCurrentBeatPos();
+            if (timeCode.isRunning() && currentSong.calcBeatDistance(currentSong.getLastBeat(), currentBeatPos) >= 0) {
+                // pad was pressed while the animation already finished (but the time code kept going)
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackController().stopBlinkLed(MixTrackController.CUE_B_LED_ADDRESS);
+                PlayLights.getInstance().getMidiOrganizer().getMixTrackController().setLedIllumination(MixTrackController.CUE_B_LED_ADDRESS, false);
+            }
 
-        timeCode.syncNow(currentSong.getClosestEventOfPadAction(padAction, currentBeatPos).getEventTime());
-        currentBeatPos = timeCode.calcCurrentBeatPos();
-        SongPlayerController.getInstance().setNextUserEvent(currentSong.calcNextUserEvent(currentBeatPos));
+            timeCode.syncNow(currentSong.getClosestEventOfPadAction(padAction, currentBeatPos).getEventTime());
+            currentBeatPos = timeCode.calcCurrentBeatPos();
+            SongPlayerController.getInstance().setNextUserEvent(currentSong.calcNextUserEvent(currentBeatPos));
 
-        if (!SongPlayerController.getInstance().animationIsRunning()) {
-            SongPlayerController.getInstance().startAnimation();
+            if (!SongPlayerController.getInstance().animationIsRunning()) {
+                SongPlayerController.getInstance().startAnimation();
+            }
         }
     }
 
     public void playPausePressed() {
+        if (currentSong.getComplexity() == Song.ModelComplexity.simple) {
+            // play / pause is not functionality is only used for complex song models
+            return;
+        }
         if (currentSong.calcBeatDistance(currentSong.getLastBeat(), timeCode.calcCurrentBeatPos()) >= 0) {
             if (timeCode.isRunning()) {
                 //the song is running after the last beat of the song
@@ -158,9 +167,12 @@ public class SongPlayer {
     }
 
     public void resetPressed() {
-        if ((!timeCode.isRunning() && !timeCode.atFirstBeat()) || (timeCode.isRunning()
-                && currentSong.calcBeatDistance(currentSong.getLastBeat(), timeCode.calcCurrentBeatPos()) >= 0)) {
 
+        if (currentSong.getComplexity() == Song.ModelComplexity.complex && (
+                (!timeCode.isRunning() && !timeCode.atFirstBeat())
+                        || (timeCode.isRunning() && currentSong.calcBeatDistance(
+                        currentSong.getLastBeat(), timeCode.calcCurrentBeatPos()) >= 0)
+        )) {
             //song is stopped not at the beginning of the song or the song is running after the last beat of the song
             MidiOrganizer mo = PlayLights.getInstance().getMidiOrganizer();
             mo.sendMpcMidiMessage(currentSong.getStartUpMessage());

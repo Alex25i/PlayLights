@@ -59,7 +59,6 @@ public class SongPlayerController {
     public void prepare(SongPlayer songPlayer, Runnable songEnd) {
         player = songPlayer;
 
-
         drawSongGrid();
         drawUserEventMarker();
         drawStaticOverlay();

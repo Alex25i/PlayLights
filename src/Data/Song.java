@@ -7,11 +7,17 @@ import javax.sound.midi.ShortMessage;
 import java.util.*;
 
 public class Song {
+    // static
+    public enum ModelComplexity {
+        simple, complex
+    }
 
+    // dynamic
     private String name;
     private String interpret;
     private int tempo;
     private int beatsPerBar;
+    private ModelComplexity complexity;
 
     private BeatStamp lastBeat;
     private ShortMessage startUpMessage;
@@ -24,13 +30,14 @@ public class Song {
      */
     private MixTrackController.PAD autoStartPad;
 
-    public Song(String name, String interpret, int tempo, int beatsPerBar, BeatStamp lastBeat, ShortMessage startUpMessage,
+    public Song(String name, String interpret, int tempo, int beatsPerBar, ModelComplexity complexity, BeatStamp lastBeat, ShortMessage startUpMessage,
                 MixTrackController.PAD autoStartPad) {
         this.name = name;
         this.interpret = interpret;
         this.tempo = tempo;
         this.userEvents = new ArrayList<>();
         this.beatsPerBar = beatsPerBar;
+        this.complexity = complexity;
         this.startUpMessage = startUpMessage;
         padActions = new HashMap<>(16);
         this.lastBeat = lastBeat;
@@ -324,6 +331,10 @@ public class Song {
 
     public int getBeatsPerBar() {
         return beatsPerBar;
+    }
+
+    public ModelComplexity getComplexity() {
+        return complexity;
     }
 
     public BeatStamp getLastBeat() {

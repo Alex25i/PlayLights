@@ -4,6 +4,7 @@
   "interpret": "Nickelback",
   "tempo": 172,
   "beatsPerBar": 4,
+  "modelComplexity": "complex",
   "lastBeat": {
     "bar": 151,
     "beatNr": 4
