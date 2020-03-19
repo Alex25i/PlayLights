@@ -2,6 +2,8 @@ package Data;
 
 import GUI.SongCenterController;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +16,34 @@ public class Library {
     public Library() {
         songList = new ArrayList<>();
         gigList = new ArrayList<>();
-        createSongs();
+        readSongs();
     }
 
     private void createSongs() {
         songList.add(HowYouRemindMe.createSong());
     }
+
+    private void readSongs() {
+        File dir = new File("Songs/HYRM.json");
+        File[] directoryListing = dir.listFiles();
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                try {
+                    Song song = new SongReader(child.getAbsolutePath()).read();
+                    songList.add(song);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        } else {
+            // Handle the case where dir is not really a directory.
+            // Checking dir.isDirectory() above would not be sufficient
+            // to avoid race conditions with another process that deletes
+            // directories.
+        }
+    }
+
     /**
      * creates an empty gig which can be filled with data afterwards
      *
