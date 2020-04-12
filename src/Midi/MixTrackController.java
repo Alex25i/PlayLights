@@ -104,10 +104,10 @@ public class MixTrackController {
     public static final byte CUE_HEADPHONE_B_ADDRESS = 0x52;
 
     // pitch bend button (top outer corner)
-    public static final byte PITHC_BEND_MINUS_A_ADDRESS = 0x43;
-    public static final byte PITHC_BEND_PLUS_A_ADDRESS = 0x44;
-    public static final byte PITHC_BEND_PLUS_B_ADDRESS = 0x45;
-    public static final byte PITHC_BEND_MINUS_B_ADDRESS = 0x46;
+    public static final byte PITCH_BEND_MINUS_A_ADDRESS = 0x43;
+    public static final byte PITCH_BEND_PLUS_A_ADDRESS = 0x44;
+    public static final byte PITCH_BEND_PLUS_B_ADDRESS = 0x45;
+    public static final byte PITCH_BEND_MINUS_B_ADDRESS = 0x46;
 
     // midi command (Message type 0xb0)
 
@@ -214,6 +214,8 @@ public class MixTrackController {
     // overwrites for the intensity faders
     private boolean cueAOverwrite = false;
     private boolean cueBOverwrite = false;
+    private boolean scratchAOverwrite = false;
+    private boolean scratchBOverwrite = false;
 
     MixTrackController() {
         blinkingLEDs = new HashMap<>();
@@ -568,27 +570,54 @@ public class MixTrackController {
     }
 
     void cueASelectPressed() {
+        // back intensity overwrite
         cueAOverwrite = !cueAOverwrite;
         if (cueAOverwrite) {
-            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 0,
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 5,
                     MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
         } else {
-            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 1,
-                    MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 5,
+                    MidiOrganizer.VELOCITY_NONE, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
 
         }
         setLedIllumination(CUE_HEADPHONE_A_LED_ADDRESS, cueAOverwrite);
     }
 
     void cueBSelectPressed() {
+        // side intensity overwrite
         cueBOverwrite = !cueBOverwrite;
         if (cueBOverwrite) {
-            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 2,
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 6,
                     MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
         } else {
-            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 3,
-                    MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 6,
+                    MidiOrganizer.VELOCITY_NONE, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
         }
         setLedIllumination(CUE_HEADPHONE_B_LED_ADDRESS, cueBOverwrite);
+    }
+
+    void scratchAPressed() {
+        //front intensity overwrite
+        scratchAOverwrite = !scratchAOverwrite;
+        if (scratchAOverwrite) {
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 4,
+                    MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
+        } else {
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 4,
+                    MidiOrganizer.VELOCITY_NONE, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
+        }
+        setLedIllumination(SCRATCH_A_LED_ADDRESS, scratchAOverwrite);
+    }
+    void scratchBPressed() {
+        // blinder intensity overwrite
+        scratchBOverwrite = !scratchBOverwrite;
+        if (scratchAOverwrite) {
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 7,
+                    MidiOrganizer.VELOCITY_FULL, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
+        } else {
+            PlayLights.getInstance().getMidiOrganizer().sendMidiMessage(MidiOrganizer.MESSAGE_TYPE_NOTE_ON, 7,
+                    MidiOrganizer.VELOCITY_NONE, PlayLights.getInstance().getMidiOrganizer().getMpcDeviceConnector());
+        }
+        setLedIllumination(SCRATCH_B_LED_ADDRESS, scratchBOverwrite);
     }
 }

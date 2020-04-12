@@ -85,20 +85,42 @@ public class MidiOrganizer {
             }
 
             // independent weather a song is loaded or not
-            if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.GAIN_A_FADER_ADDRESS) {
+            if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.SPEED_A_FADER_ADDRESS) {
+                // front intensity
+                sendMpcMidiMessage(MESSAGE_TYPE_COMMAND, 0, 0, midiVelocity);
+            } else if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.GAIN_A_FADER_ADDRESS) {
+                // back intensity
                 sendMpcMidiMessage(MESSAGE_TYPE_COMMAND, 0, 1, midiVelocity);
             } else if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.GAIN_MASTER_FADER_ADDRESS) {
-                sendMpcMidiMessage(MESSAGE_TYPE_COMMAND, 0, 2, midiVelocity);
+                // unused
             } else if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.GAIN_B_FADER_ADDRESS) {
+                // side intensity
+                sendMpcMidiMessage(MESSAGE_TYPE_COMMAND, 0, 2, midiVelocity);
+            } else if (midiType == MESSAGE_TYPE_COMMAND && midiNode == MixTrackController.SPEED_B_FADER_ADDRESS) {
+                // blinder intensity
                 sendMpcMidiMessage(MESSAGE_TYPE_COMMAND, 0, 3, midiVelocity);
+            } else if (midiType == MESSAGE_TYPE_NOTE_ON
+                    //front intensity overwrite
+                    && (midiNode == MixTrackController.PITCH_BEND_MINUS_A_ADDRESS
+                    || midiNode == MixTrackController.SCRATCH_A_ADDRESS)
+                    && midiVelocity == VELOCITY_FULL) {
+                mixTrackController.scratchAPressed();
             } else if (midiType == MESSAGE_TYPE_NOTE_ON && midiNode == MixTrackController.CUE_HEADPHONE_A_ADDRESS && midiVelocity == VELOCITY_FULL) {
+                // back intensity overwrite
                 mixTrackController.cueASelectPressed();
             } else if (midiType == MESSAGE_TYPE_NOTE_ON && midiNode == MixTrackController.CUE_HEADPHONE_B_ADDRESS && midiVelocity == VELOCITY_FULL) {
+                // side intensity overwrite
                 mixTrackController.cueBSelectPressed();
+            } else if (midiType == MESSAGE_TYPE_NOTE_ON
+                && (midiNode == MixTrackController.PITCH_BEND_PLUS_B_ADDRESS
+                || midiNode == MixTrackController.SCRATCH_B_ADDRESS)
+                && midiVelocity == VELOCITY_FULL) {
+                // blinder intensity overwrite
+                mixTrackController.scratchBPressed();
             }
 
         } else if (sourceName.contains("LoopBe")) {
-
+            // no talking back from Onyx possible (yet?)
         }
 
     }
